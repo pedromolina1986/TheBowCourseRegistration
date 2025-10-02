@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { BarChart3, User, Plus, Edit, Search, Users, Mail, GraduationCap, FileText, ChevronRight, MoreVertical, UserPlus, Bell, Settings } from 'lucide-react';
+import SidebarMenu from '../components/SidebarMenu.jsx';
 
 const AdminDashboard = () => {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
 
   const stats = [
     { label: 'Total Students', value: '156', change: '+12 this month', icon: Users },
@@ -88,37 +88,11 @@ const AdminDashboard = () => {
     { label: 'Review Forms', icon: Mail }
   ];
 
+
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex items-center gap-3">
-          <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white font-bold">
-            BC
-          </div>
-          <span className="font-semibold text-gray-900">Bow Course Registration</span>
-        </div>
-        
-        <nav className="flex-1 p-4">
-          {menuItems.map(item => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveMenu(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                  activeMenu === item.id 
-                    ? 'bg-gray-100 text-gray-900' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="text-sm font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
-      </aside>
+      
+      <SidebarMenu menuItems={menuItems} />
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
