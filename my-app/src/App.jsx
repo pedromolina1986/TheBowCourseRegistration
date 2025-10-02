@@ -2,6 +2,8 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import Home from './pages/home';
+import AdminDashboard from './pages/adminDashboard.jsx';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
 
@@ -12,7 +14,12 @@ function App() {
   document.head.appendChild(style);
 
   return (
-    <Home />
+<Router>
+      <Routes>
+        <Route path="/" element={<Home to="/home" replace />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />        
+      </Routes>
+    </Router>
   );
 }
 
