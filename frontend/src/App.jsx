@@ -7,6 +7,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 function App() {
 
+  // Load Tailwind CSS
+  const style = document.createElement('link');
+  style.rel = 'stylesheet';
+  style.href = 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
+  document.head.appendChild(style);
+
 return (
     <Router>
       <Routes>
