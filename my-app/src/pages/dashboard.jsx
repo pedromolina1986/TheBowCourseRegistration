@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { BarChart3, User, Plus, Edit, Search, Users, Mail, GraduationCap, FileText, ChevronRight, MoreVertical, UserPlus, Bell, Settings } from 'lucide-react';
 import SidebarMenu from '../components/SidebarMenu.jsx';
+import Header from '../components/Header.jsx';
 
-const AdminDashboard = () => {
+const Dashboard = () => {
 
   const stats = [
     { label: 'Total Students', value: '156', change: '+12 this month', icon: Users },
@@ -96,22 +97,7 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>
-            <p className="text-sm text-gray-600 mt-1">Welcome back, John Smith. Here's an overview of the SD department.</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Administrator</span>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Bell size={20} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Settings size={20} className="text-gray-600" />
-            </button>
-          </div>
-        </header>
+        <Header />
 
         <div className="p-8">
           {/* User Info Card */}
@@ -280,4 +266,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;
