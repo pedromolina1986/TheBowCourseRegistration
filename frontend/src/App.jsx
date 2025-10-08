@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import Home from './pages/home';
 import Dashboard from './pages/dashboard';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardAdmin from './components/DashboardAdmin';
 
 function App() {
 
@@ -17,7 +18,17 @@ return (
     <Router>
       <Routes>
         <Route path="/" element={<Home to="/home" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />        
+        <Route path="/dashboard" element={<Dashboard />}>        
+          <Route index element={<DashboardAdmin />} />          
+          <Route path="profile" element={<div className="p-6">Profile Page</div>} />
+          <Route path="create" element={<div className="p-6">Create Courses Page</div>} />
+          <Route path="edit" element={<div className="p-6">Edit Courses Page</div>} />
+          <Route path="search" element={<div className="p-6">Search Courses Page</div>} />
+          <Route path="students" element={<div className="p-6">Registered Students Page</div>} />
+          <Route path="forms" element={<div className="p-6">Submitted Forms Page</div>} />
+        </Route>
+        <Route path="*" element={<Navigate to="/dashboard" replace />} >            
+        </Route>
       </Routes>
     </Router>
   );
