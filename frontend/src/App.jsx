@@ -4,7 +4,8 @@ import viteLogo from '/vite.svg'
 import Home from './pages/home';
 import Dashboard from './pages/dashboard';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import DashboardAdmin from './components/DashboardAdmin';
+import DashboardAdmin from "./pages/DashboardAdmin";
+
 
 function App() {
 
