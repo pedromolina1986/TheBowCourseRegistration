@@ -1,9 +1,18 @@
 import { GraduationCap, Bell, Settings } from 'lucide-react';
 
 const handleClick = () => {
-  // Redirect to the admin page
-  window.location.href = '/dashboard';
+  // Redirect to the login page
+  window.location.href = '/login';
 };
+
+const logoClick = () => {
+  window.location.href = '/'
+}
+
+const signUpClick = () => {
+  window.location.href = '/register'
+}
+
 
 const Header = () => (
   window.location.pathname === '/dashboard' ? (
@@ -27,7 +36,7 @@ const Header = () => (
   ) : (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 hover:cursor-pointer" onClick={logoClick}>
           <GraduationCap className="w-6 h-6" />
           <span className="text-lg font-semibold">Bow Course Registration</span>
         </div>
@@ -38,7 +47,10 @@ const Header = () => (
           >
             Login
           </button>
-          <button className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800">
+          <button 
+          className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800"
+          onClick={signUpClick}
+          >
             Sign Up
           </button>
         </div>

@@ -2,13 +2,10 @@ import { useState } from 'react';
 import { Code, Globe, Database, TestTube, Search, ChevronDown } from 'lucide-react';
 import CourseCard from './CourseCard';
 
-const Courses = () => {
+const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('All Terms');
 
-  const loadMoreClick = () => {
-    window.location.href = '/courses'
-  }
 
   const courses = [
     {
@@ -54,7 +51,7 @@ const Courses = () => {
   ];
 
   return (
-    <section className="bg-white py-16">
+    <section className="bg-white py-16 rounded-lg border border-neutral-200 mx-auto my-8 p-8 max-w-7xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Available Courses</h2>
@@ -93,14 +90,9 @@ const Courses = () => {
             <CourseCard key={i} {...course} />
           ))}
         </div>
-        <div className="text-center">
-          <button className="px-6 py-3 border border-gray-300 rounded hover:bg-gray-50" onClick={loadMoreClick}>
-            Load More Courses
-          </button>
-        </div>
       </div>
     </section>
   );
 };
 
-export default Courses;
+export default AllCourses;

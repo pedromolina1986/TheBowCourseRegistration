@@ -1,5 +1,12 @@
-
+const courseClick = () => {
+  window.location.href = '/courses'
+}
+const programClick = () => {
+  window.location.href = '/programs'
+}
 const Hero = () => (
+  
+
   <section className="bg-white py-16">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -24,10 +31,10 @@ const Hero = () => (
             ))}
           </ul>
           <div className="flex gap-4">
-            <button className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-800">
+            <button className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-800" onClick={programClick}>
               Explore Programs
             </button>
-            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
+            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded hover:bg-gray-50" onClick={courseClick}>
               View Courses
             </button>
           </div>
