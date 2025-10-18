@@ -1,3 +1,5 @@
+
+
 const courseClick = () => {
   window.location.href = '/courses'
 }
@@ -39,9 +41,7 @@ const Hero = () => (
             </button>
           </div>
         </div>
-        <div className="bg-gray-200 rounded-lg h-80 flex items-center justify-center">
-          <p className="text-gray-400 text-lg">Students Learning Together</p>
-        </div>
+        <img src="./public/Student.jpg.webp" alt="Student Learning Together" className="object-cover rounded-lg" /> 
       </div>
     </div>
   </section>
