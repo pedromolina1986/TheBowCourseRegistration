@@ -9,7 +9,7 @@ const programClick = () => {
 const Hero = () => (
   
 
-  <section className="bg-white py-16">
+  <section className="bg-gradient-to-br from-blue-100 to-purple-100 py-16">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
@@ -33,10 +33,10 @@ const Hero = () => (
             ))}
           </ul>
           <div className="flex gap-4">
-            <button className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-800" onClick={programClick}>
+            <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105" onClick={programClick}>
               Explore Programs
             </button>
-            <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded hover:bg-gray-50" onClick={courseClick}>
+            <button className="px-6 py-2.5 bg-white text-gray-700 border-2 border-gray-200 font-bold rounded-lg hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:scale-105" onClick={courseClick}>
               View Courses
             </button>
           </div>

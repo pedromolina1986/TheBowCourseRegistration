@@ -16,7 +16,7 @@ const signUpClick = () => {
 
 const Header = () => (
   window.location.pathname === '/dashboard' ? (
-    <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>
         <p className="text-sm text-gray-600 mt-1">
@@ -25,16 +25,16 @@ const Header = () => (
       </div>
       <div className="flex items-center gap-4">
         <span className="text-sm text-gray-600">Administrator</span>
-        <button className="p-2 hover:bg-gray-100 rounded-lg">
+        <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
           <Bell size={20} className="text-gray-600" />
         </button>
-        <button className="p-2 hover:bg-gray-100 rounded-lg">
+        <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
           <Settings size={20} className="text-gray-600" />
         </button>
       </div>
     </header>
   ) : (
-    <header className="bg-white shadow-sm">
+    <header className="sticky top-0 z-50 bg-white backdrop-blur-sm border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2 hover:cursor-pointer" onClick={logoClick}>
           <GraduationCap className="w-6 h-6" />
@@ -42,13 +42,13 @@ const Header = () => (
         </div>
         <div className="flex gap-3">
           <button
-            className="px-4 py-2 text-gray-700 hover:text-gray-900"
+            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
             onClick={handleClick}
           >
             Login
           </button>
           <button 
-          className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800"
+          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
           onClick={signUpClick}
           >
             Sign Up

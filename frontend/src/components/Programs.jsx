@@ -42,11 +42,11 @@ const Programs = () => {
     }
   ];
 return (
-    <section className="bg-gray-50 py-16">
+    <section className="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Programs</h2>
-          <p className="text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-white text-3xl font-bold mb-4">Our Programs</h2>
+          <p className="text-white max-w-3xl mx-auto">
             Choose from our comprehensive Software Development programs designed to fit your career goals and schedule.
           </p>
         </div>

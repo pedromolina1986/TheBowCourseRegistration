@@ -2,8 +2,8 @@ import { Sprout, Sun, Leaf, Snowflake } from 'lucide-react';
 
 const TermOption = ({ icon: Icon, title, months, dates, registration }) => (
   <div className="text-center p-6">
-    <div className="inline-flex items-center justify-center w-12 h-12 bg-gray-100 rounded-full mb-4">
-      <Icon className="w-6 h-6 text-gray-700" />
+    <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-4">
+      <Icon className="w-6 h-6 text-white" />
     </div>
     <h3 className="text-lg font-semibold mb-2">{title}</h3>
     <p className="text-sm text-gray-600 mb-3">{months}</p>
@@ -45,7 +45,7 @@ const TermOptions = () => {
   ];
 
   return (
-    <section className="bg-gray-50 py-16">
+    <section className="bg-gradient-to-br from-blue-100 to-purple-100 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Flexible Term Options</h2>
