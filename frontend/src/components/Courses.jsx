@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Code, Globe, Database, TestTube, Search, ChevronDown } from 'lucide-react';
 import CourseCard from './CourseCard';
+import WhiteButton from './WhiteButton';
 
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -94,9 +95,7 @@ const Courses = () => {
           ))}
         </div>
         <div className="text-center">
-          <button className="px-6 py-2.5 bg-white text-gray-700 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:scale-105" onClick={loadMoreClick}>
-            Load More Courses
-          </button>
+          <WhiteButton OnclickHandler={loadMoreClick} label={"Load More Courses"}/>
         </div>
       </div>
     </section>

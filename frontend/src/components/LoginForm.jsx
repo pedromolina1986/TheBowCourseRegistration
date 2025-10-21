@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GraduationCap, Bell, Settings } from 'lucide-react';
-
+import ColorButtonFull from './ColorButtonFull';
 
 
 const LogingForm =  () => {
@@ -41,7 +41,7 @@ const LogingForm =  () => {
     };
 
     return (
-    <section className="bg-neutral-50 flex items-center justify-center px-6 py-12 h-[800px]">
+    <section className="bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center px-6 py-12 h-[700px]">
         <div className="bg-white border border-neutral-200 rounded-lg p-8 shadow-sm">
             <div className="text-center mb-8">
                 <GraduationCap className="mx-auto w-10 h-10" />
@@ -85,12 +85,7 @@ const LogingForm =  () => {
                     </span>
                 </div>
 
-                <button
-                type="submit"
-                className="w-full px-4 py-3 bg-gray-900 text-white rounded hover:bg-gray-800"
-                >
-                Sign In
-                </button>
+                <ColorButtonFull type='submit' label={"Sign in"}/>
             </form>
 
             {message && (

@@ -6,10 +6,11 @@ import Courses from '../components/Courses.jsx';
 import TermOptions from '../components/TermOptions.jsx';
 import CTA from '../components/CTA.jsx';
 import Footer from '../components/Footer.jsx';
+import WrapContainer from '../components/WrapContainer.jsx';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <WrapContainer>
       <Header />
       <Hero />
       <Programs />
@@ -17,6 +18,6 @@ export default function Home() {
       <TermOptions />
       <CTA />
       <Footer />
-    </div>
+    </WrapContainer>
   );
 }

@@ -2,15 +2,16 @@ import React, { useState } from 'react';
 import Header from '../components/Header.jsx';
 import LoginForm from '../components/LoginForm.jsx';
 import Footer from '../components/Footer.jsx';
+import WrapContainer from '../components/WrapContainer.jsx';
 
 export default function Login() {
 
 
     return(
-        <div className="min-h-screen bg-white">
+        <WrapContainer>
             <Header />
             <LoginForm />
             <Footer />
-        </div>
+        </WrapContainer>
     )
 }

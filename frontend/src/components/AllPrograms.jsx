@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Search, GraduationCap, Award, Code, Smartphone } from "lucide-react"; 
+import ColorButton from "./ColorButton";
+import WhiteButton from "./WhiteButton";
+import WhiteButtonFull from "./WhiteButtonFull";
 
 const ProgramsPage = () => {
   const [search, setSearch] = useState("");
@@ -126,7 +129,7 @@ const ProgramsPage = () => {
             key={index}
             className="bg-white rounded-lg border border-neutral-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="bg-gray-600 h-32 flex items-center justify-center text-white">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-32 flex items-center justify-center text-white">
               <div className="text-center items-center">
                 {program.icon}
                 <p className="text-sm">{program.title}</p>
@@ -152,9 +155,7 @@ const ProgramsPage = () => {
                 {program.description}
               </p>
               <div className="flex items-center justify-between">
-                <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-neutral-700 transition">
-                  View Details
-                </button>
+                <WhiteButtonFull label={"View Details"} />
               </div>
             </div>
           </div>

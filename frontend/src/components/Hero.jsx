@@ -1,3 +1,5 @@
+import ColorButton from "./ColorButton";
+import WhiteButton from "./WhiteButton";
 
 
 const courseClick = () => {
@@ -33,12 +35,9 @@ const Hero = () => (
             ))}
           </ul>
           <div className="flex gap-4">
-            <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105" onClick={programClick}>
-              Explore Programs
-            </button>
-            <button className="px-6 py-2.5 bg-white text-gray-700 border-2 border-gray-200 font-bold rounded-lg hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:scale-105" onClick={courseClick}>
-              View Courses
-            </button>
+            <ColorButton OnclickHandler={programClick} label={"Explore Programs"}/>
+            <WhiteButton OnclickHandler={courseClick} label={"View Courses"}/>
+
           </div>
         </div>
         <img src="./public/Student.jpg.webp" alt="Student Learning Together" className="object-cover rounded-lg" /> 
@@ -48,3 +47,4 @@ const Hero = () => (
 );
 
 export default Hero;
+

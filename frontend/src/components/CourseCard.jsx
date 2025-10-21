@@ -1,3 +1,7 @@
+import ColorButtonFull from "./ColorButtonFull";
+import WhiteButton from "./WhiteButton";
+import WhiteButtonFull from "./WhiteButtonFull";
+
 const CourseCard = ({ code, title, term, description, startDate, endDate, credits, icon: Icon }) => (
   <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
     <div className="flex items-start justify-between mb-4">
@@ -22,9 +26,8 @@ const CourseCard = ({ code, title, term, description, startDate, endDate, credit
         <span className="font-medium">{credits}</span>
       </div>
     </div>
-    <button className="w-full py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm">
-      View Course Details
-    </button>
+    <ColorButtonFull label={"View Course Details"}/>
+
   </div>
 );
 

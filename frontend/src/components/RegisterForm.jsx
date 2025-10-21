@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
+import ColorButton from './ColorButton';
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState('');
@@ -184,7 +185,7 @@ const RegisterForm = () => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full border border-neutral-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent"
+                className="w-full h-50 border border-neutral-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent"
                 placeholder="Choose a username"
               />
             </div>
@@ -224,12 +225,7 @@ const RegisterForm = () => {
             ← Back to Login
           </span>
 
-          <button
-            type="submit"
-            className="px-6 py-3 bg-gray-900 text-white rounded hover:bg-gray-800"
-          >
-            Create Account →
-          </button>
+          <ColorButton type='submit' label={"Create Account →"} />
         </div>
       </form>
     </div>

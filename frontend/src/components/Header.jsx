@@ -1,4 +1,5 @@
 import { GraduationCap, Bell, Settings } from 'lucide-react';
+import ColorButton from './ColorButton';
 
 const handleClick = () => {
   // Redirect to the login page
@@ -16,7 +17,7 @@ const signUpClick = () => {
 
 const Header = () => (
   window.location.pathname === '/dashboard' ? (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
       <div>
         <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>
         <p className="text-sm text-gray-600 mt-1">
@@ -25,12 +26,9 @@ const Header = () => (
       </div>
       <div className="flex items-center gap-4">
         <span className="text-sm text-gray-600">Administrator</span>
-        <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-          <Bell size={20} className="text-gray-600" />
-        </button>
-        <button className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-          <Settings size={20} className="text-gray-600" />
-        </button>
+        <ColorButton label={<Bell size={20} className="text-white" />}/>
+        <ColorButton label={<Settings size={20} className="text-white" />}/>
+        
       </div>
     </header>
   ) : (
@@ -41,18 +39,8 @@ const Header = () => (
           <span className="text-lg font-semibold">Bow Course Registration</span>
         </div>
         <div className="flex gap-3">
-          <button
-            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-            onClick={handleClick}
-          >
-            Login
-          </button>
-          <button 
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-          onClick={signUpClick}
-          >
-            Sign Up
-          </button>
+          <ColorButton OnclickHandler={handleClick} label={"Login"} />
+          <ColorButton OnclickHandler={signUpClick} label={"Sign Up"} />
         </div>
       </div>
     </header>

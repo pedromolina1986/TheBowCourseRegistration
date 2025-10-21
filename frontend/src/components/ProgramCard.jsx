@@ -1,6 +1,8 @@
+import ColorButtonFull from "./ColorButtonFull";
+import WhiteButtonFull from "./WhiteButtonFull";
 
 const ProgramCard = ({ icon: Icon, title, duration, description, details }) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+  <div className="bg-white rounded-lg flex flex-col justify-between border border-gray-200 p-6 hover:shadow-lg transition-shadow">
     <div className="flex items-center gap-3 mb-4">
       <Icon className="w-6 h-6" />
       <h3 className="text-xl font-semibold">{title}</h3>
@@ -15,9 +17,7 @@ const ProgramCard = ({ icon: Icon, title, duration, description, details }) => (
         </div>
       ))}
     </div>
-    <button className="w-full py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm">
-      View Details
-    </button>
+    <ColorButtonFull label={"View Details"}/>
   </div>
 );
 
