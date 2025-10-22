@@ -9,6 +9,9 @@ import Dashboard from './pages/dashboard';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardAdmin from "./pages/DashboardAdmin";
 import Programs from './pages/programs';
+import TermSelection from './components/TermSelection';
+import CourseRegistration from './components/CourseRegistration';
+import MyCourses from './components/MyCourses';
 
 
 
@@ -23,7 +26,7 @@ function App() {
 return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home to="/home" replace />} />
+      <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path='/courses' element={<Courses/>} />
@@ -37,6 +40,9 @@ return (
           <Route path="students" element={<div className="p-6">Registered Students Page</div>} />
           <Route path="forms" element={<div className="p-6">Submitted Forms Page</div>} />
         </Route>
+        <Route path="/term-selection" element={<TermSelection />} />
+        <Route path="/course-registration" element={<CourseRegistration />} />
+        <Route path="/my-courses" element={<MyCourses />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} >            
         </Route>
       </Routes>
