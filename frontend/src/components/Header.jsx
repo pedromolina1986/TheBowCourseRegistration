@@ -35,30 +35,7 @@ const Header = () => {
         <div className="flex items-center gap-2 hover:cursor-pointer" onClick={() => navigate('/')}>
           <GraduationCap className="w-6 h-6" />
           <span className="text-lg font-semibold">Bow Course Registration</span>
-        </div>
-
-        {/* Navigation Links */}
-        <nav className="flex gap-6">
-          {[
-            { name: 'Term Selection', to: '/term-selection' },
-            { name: 'Course Registration', to: '/course-registration' },
-            { name: 'My Courses', to: '/my-courses' },
-          ].map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) =>
-                `font-medium transition border-b-2 pb-1 ${
-                  isActive
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-gray-700 border-transparent hover:text-blue-600 hover:border-blue-600'
-                }`
-              }
-            >
-              {link.name}
-            </NavLink>
-          ))}
-        </nav>
+        </div>        
 
         {/* Login / Sign Up */}
         <div className="flex gap-3">
