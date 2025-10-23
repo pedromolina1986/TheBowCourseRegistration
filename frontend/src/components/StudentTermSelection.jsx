@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const StudentTermSelection = () => {
   const [selectedTerm, setSelectedTerm] = useState("Winter 2025");
+  const navigate = useNavigate();
 
   const terms = [
     {
@@ -39,10 +41,20 @@ const StudentTermSelection = () => {
     },
   ];
 
+  // 🔹 Continue to Course Registration
+  const handleContinue = () => {
+    navigate("/dashboard/courseregistration", { state: { selectedTerm } });
+  };
+
+  // 🔹 Back to Student Dashboard
+  const handleBack = () => {
+    navigate("/dashboard");
+  };
+
   return (
-    <div className="p-4 sm:p-8">
+    <div className="p-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-semibold">Select Your Term</h1>
           <p className="text-gray-500">
@@ -68,7 +80,7 @@ const StudentTermSelection = () => {
         <h2 className="text-lg font-semibold mb-2">
           Current Program Information
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-2 text-sm">
+        <div className="grid grid-cols-4 text-sm gap-y-2">
           <p>
             <strong>Program:</strong> Software Development - Diploma (2 years)
           </p>
@@ -86,7 +98,7 @@ const StudentTermSelection = () => {
       </div>
 
       {/* Terms */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
         {terms.map((term) => (
           <div
             key={term.name}
@@ -160,11 +172,17 @@ const StudentTermSelection = () => {
       </div>
 
       {/* Bottom Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-        <button className="border px-5 py-2 rounded-lg text-gray-700 hover:bg-gray-100 w-full sm:w-auto">
+      <div className="flex justify-between items-center">
+        <button
+          onClick={handleBack}
+          className="border px-5 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+        >
           ← Back to Dashboard
         </button>
-        <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+        <button
+          onClick={handleContinue}
+          className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+        >
           Continue to Course Registration →
         </button>
       </div>
