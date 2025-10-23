@@ -218,6 +218,12 @@ const SearchCourses = () => {
             <RotateCcw size={18} />
             <span className="font-medium">Clear Filters</span>
           </button>
+          <button
+            onClick={() => navigate("/dashboard/courseForm")}
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+          >
+            <span className="font-medium">+ Create New Course</span>
+          </button>
           <div className="ml-auto text-sm text-gray-600">
             Found {filteredCourses.length} course
             {filteredCourses.length !== 1 ? "s" : ""}
