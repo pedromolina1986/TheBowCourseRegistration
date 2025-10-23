@@ -7,11 +7,11 @@ import Register from "./pages/register";
 import Courses from "./pages/courses";
 import Dashboard from "./pages/dashboard";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+import { HashRouter } from 'react-router-dom'
 import DashboardAdmin from "./pages/DashboardAdmin";
 import Programs from "./pages/programs";
 import MyCourses from "./components/MyCourses";
@@ -34,7 +34,7 @@ function App() {
   document.head.appendChild(style);
 
   return (
-    <Router>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
@@ -53,9 +53,9 @@ function App() {
           <Route path="terms" element={<StudentTermSelection />} />          
           <Route path="contact" element={<StudentContactAdmin />} />          
         </Route>        
-        <Route path="*" element={<Navigate to="/dashboard" replace />}></Route>
+        <Route path="*" element={<Navigate to="/" replace />}></Route>
       </Routes>
-    </Router>
+    </HashRouter>
   );
 }
 

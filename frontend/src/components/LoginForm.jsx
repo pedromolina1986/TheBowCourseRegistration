@@ -30,7 +30,7 @@ const LogingForm =  () => {
     if (foundUser) {
         localStorage.setItem('isLoggedIn', 'true');
         localStorage.setItem('currentUser', JSON.stringify(foundUser));
-        window.location.href = '/dashboard';
+        window.location.href = '#/dashboard';
     } else {
         setMessage('❌ Invalid username or password');
     }
