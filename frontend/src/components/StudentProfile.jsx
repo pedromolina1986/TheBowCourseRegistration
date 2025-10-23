@@ -18,7 +18,8 @@ const ProfilePage = () => {
     profilePhoto: "",
   };
 
-  const storedProfile = JSON.parse(localStorage.getItem("profileData")) || defaultProfile;
+  const storedProfile =
+    JSON.parse(localStorage.getItem("profileData")) || defaultProfile;
   const [profileData, setProfileData] = useState(storedProfile);
 
   useEffect(() => {
@@ -49,24 +50,32 @@ const ProfilePage = () => {
   // Check if profile is complete (no empty required fields)
   const isProfileComplete = () => {
     const requiredFields = [
-      "firstName", "lastName", "email", "phone",
-      "StudentId", "department", "startDate",
-      "street", "city", "province", "postalCode"
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "StudentId",
+      "department",
+      "startDate",
+      "street",
+      "city",
+      "province",
+      "postalCode",
     ];
     return requiredFields.every((field) => profileData[field]?.trim() !== "");
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col p-10 text-gray-800">
+    <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 lg:p-10 text-gray-800">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">My Profile</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+        <h1 className="text-xl sm:text-2xl font-bold">My Profile</h1>
         <div className="flex items-center space-x-3">
           {profileData.profilePhoto ? (
             <img
               src={profileData.profilePhoto}
               alt="profile"
-              className="w-10 h-10 rounded-full"
+              className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
             <FaUserCircle className="text-2xl text-gray-600" />
@@ -80,21 +89,33 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      {/* Main Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
-        <div className="col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           {/* Personal Info */}
-          <section className="bg-white p-6 rounded-2xl shadow">
+          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow">
             <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {["firstName","lastName","email","phone","street","city","province","postalCode"].map((key) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                "firstName",
+                "lastName",
+                "email",
+                "phone",
+                "street",
+                "city",
+                "province",
+                "postalCode",
+              ].map((key) => (
                 <div key={key}>
-                  <label className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, " $1")}</label>
+                  <label className="text-sm text-gray-600 capitalize">
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </label>
                   <input
                     name={key}
                     value={profileData[key]}
                     onChange={handleChange}
-                    className="w-full border rounded-lg p-2"
+                    className="w-full border rounded-lg p-2 focus:ring focus:ring-green-200"
                   />
                 </div>
               ))}
@@ -102,27 +123,30 @@ const ProfilePage = () => {
           </section>
 
           {/* Academic Info */}
-          <section className="bg-white p-6 rounded-2xl shadow">
+          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow">
             <h2 className="text-lg font-semibold mb-4">Academic Information</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {["StudentId","department","startDate"].map((key) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {["StudentId", "department", "startDate"].map((key) => (
                 <div key={key}>
-                  <label className="text-sm text-gray-600 capitalize">{key.replace(/([A-Z])/g, " $1")}</label>
+                  <label className="text-sm text-gray-600 capitalize">
+                    {key.replace(/([A-Z])/g, " $1")}
+                  </label>
                   <input
                     name={key}
                     value={profileData[key]}
                     onChange={handleChange}
-                    className="w-full border rounded-lg p-2"
+                    className="w-full border rounded-lg p-2 focus:ring focus:ring-green-200"
                   />
                 </div>
               ))}
             </div>
           </section>
 
-          <div className="mt-6 text-right">
+          {/* Save Button */}
+          <div className="mt-4 sm:mt-6 text-right">
             <button
               onClick={handleSave}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg text-sm"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm transition"
             >
               Save Changes
             </button>
@@ -132,17 +156,17 @@ const ProfilePage = () => {
         {/* Right Column */}
         <div className="space-y-6">
           {/* Profile Photo */}
-          <section className="bg-white p-6 rounded-2xl shadow text-center">
+          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow text-center">
             {profileData.profilePhoto ? (
               <img
                 src={profileData.profilePhoto}
                 alt="profile"
-                className="w-24 h-24 mx-auto rounded-full mb-3"
+                className="w-24 h-24 mx-auto rounded-full mb-3 object-cover"
               />
             ) : (
               <FaUserCircle className="text-6xl text-gray-400 mx-auto mb-3" />
             )}
-            <label className="bg-gray-100 px-4 py-2 rounded-lg text-sm cursor-pointer">
+            <label className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm cursor-pointer transition">
               Upload New Photo
               <input
                 type="file"
@@ -154,28 +178,39 @@ const ProfilePage = () => {
           </section>
 
           {/* Quick Stats */}
-          <section className="bg-white p-6 rounded-2xl shadow">
+          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow">
             <h2 className="text-lg font-semibold mb-3">Quick Stats</h2>
             <ul className="text-sm space-y-1">
-              <li>Registered Courses: <strong>4</strong></li>
-              <li>Completed Courses: <strong>8</strong></li>
-              <li>Credits Earned: <strong>24</strong></li>
-              <li>GPA: <strong>3.7</strong></li>
+              <li>
+                Registered Courses: <strong>4</strong>
+              </li>
+              <li>
+                Completed Courses: <strong>8</strong>
+              </li>
+              <li>
+                Credits Earned: <strong>24</strong>
+              </li>
+              <li>
+                GPA: <strong>3.7</strong>
+              </li>
             </ul>
           </section>
 
           {/* Account Status */}
-          <section className="bg-white p-6 rounded-2xl shadow">
+          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow">
             <h2 className="text-lg font-semibold mb-3">Account Status</h2>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" /> <span>Account Verified</span>
+                <FaCheckCircle className="text-green-500" />{" "}
+                <span>Account Verified</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" /> <span>Email Confirmed</span>
+                <FaCheckCircle className="text-green-500" />{" "}
+                <span>Email Confirmed</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" /> <span>Enrollment Active</span>
+                <FaCheckCircle className="text-green-500" />{" "}
+                <span>Enrollment Active</span>
               </li>
               <li className="flex items-center space-x-2">
                 {isProfileComplete() ? (
@@ -183,7 +218,11 @@ const ProfilePage = () => {
                 ) : (
                   <FaCheckCircle className="text-yellow-500" />
                 )}
-                <span>{isProfileComplete() ? "Profile Completed" : "Profile Incomplete"}</span>
+                <span>
+                  {isProfileComplete()
+                    ? "Profile Completed"
+                    : "Profile Incomplete"}
+                </span>
               </li>
             </ul>
           </section>
