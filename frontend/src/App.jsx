@@ -14,14 +14,16 @@ import {
 } from "react-router-dom";
 import DashboardAdmin from "./pages/DashboardAdmin";
 import Programs from "./pages/programs";
-import TermSelection from "./components/TermSelection";
-import CourseRegistration from "./components/CourseRegistration";
 import MyCourses from "./components/MyCourses";
 import AdminProfile from "./components/AdminProfile.jsx";
 import SearchCourses from "./components/AdminCourses.jsx";
 import RegisteredStudents from "./components/AdminStudents.jsx";
 import SubmittedForms from "./components/AdminForms.jsx";
 import AdminCourseForm from "./components/AdminCourseForm.jsx";
+import StudentCourseRegistration from "./components/StudentCourseRegistration.jsx";
+import StudentTermSelection from "./components/StudentTermSelection.jsx";
+import StudentContactAdmin from "./components/StudentContactAdmin.jsx";
+import StudentMyCourses from "./components/StudentMyCourses.jsx";
 
 function App() {
   // Load Tailwind CSS
@@ -57,11 +59,11 @@ function App() {
           />
           <Route
             path="search"
-            element={<div className="p-6">Search Courses Page</div>}
+            element={<StudentCourseRegistration/>}
           />
         </Route>
-        <Route path="/term-selection" element={<TermSelection />} />
-        <Route path="/course-registration" element={<CourseRegistration />} />
+        <Route path="term-selection" element={<StudentTermSelection />} />
+        <Route path="course-registration" element={<StudentCourseRegistration />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />}></Route>
       </Routes>
     </Router>
