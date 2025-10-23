@@ -1,4 +1,5 @@
 import { BarChart3, User, Plus, Edit, Search, Users, Mail, GraduationCap, FileText, ChevronRight, MoreVertical, UserPlus, Bell, Settings } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 const stats = [
     { label: 'Total Students', value: '156', change: '+12 this month', icon: Users },
@@ -69,12 +70,15 @@ const stats = [
   ];
 
   const quickActions = [
-    { label: 'Create New Course', icon: Plus },
-    { label: 'View All Students', icon: Users },
-    { label: 'Review Forms', icon: Mail }
+    { label: 'Create New Course', icon: Plus, path: '/dashboard/courseForm' },
+    { label: 'View All Students', icon: Users, path: '/dashboard/students' },
+    { label: 'Review Forms', icon: Mail, path: '/dashboard/forms' },
   ];
 
 const DashboardAdmin = () => {
+
+  const navigate = useNavigate();
+
   return ( 
   <div className="p-8">
         {/* User Info Card */}
@@ -185,6 +189,7 @@ const DashboardAdmin = () => {
                 <button
                     key={idx}
                     className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors mb-1"
+                    onClick={() => navigate(action.path)}
                 >
                     <div className="flex items-center gap-3">
                     <Icon size={18} className="text-gray-600" />
