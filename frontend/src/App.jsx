@@ -24,6 +24,7 @@ import StudentCourseRegistration from "./components/StudentCourseRegistration.js
 import StudentTermSelection from "./components/StudentTermSelection.jsx";
 import StudentContactAdmin from "./components/StudentContactAdmin.jsx";
 import StudentMyCourses from "./components/StudentMyCourses.jsx";
+import CourseRegistrationCart from "./components/StudentCourseCart.jsx";
 
 function App() {
   // Load Tailwind CSS
@@ -49,6 +50,7 @@ function App() {
           <Route path="students" element={<RegisteredStudents />} />
           <Route path="my-courses" element={<StudentMyCourses />} />
           <Route path="courseregistration" element={<StudentCourseRegistration />} />
+          <Route path="coursecart" element={<CourseRegistrationCart />} />
           <Route path="forms" element={<SubmittedForms />} />          
           <Route path="terms" element={<StudentTermSelection />} />          
           <Route path="contact" element={<StudentContactAdmin />} />          

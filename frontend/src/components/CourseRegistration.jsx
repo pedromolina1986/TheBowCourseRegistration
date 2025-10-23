@@ -82,7 +82,7 @@ const CourseRegistration = () => {
               ? "bg-green-600 hover:bg-green-700"
               : "bg-gray-400 cursor-not-allowed"
           }`}
-          disabled={selectedCourses.length === 0}
+          disabled={selectedCourses.length === 0}          
         >
           View Cart ({selectedCourses.length})
         </button>
