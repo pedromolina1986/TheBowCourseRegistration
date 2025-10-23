@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart3,
   User,
@@ -15,38 +15,46 @@ import {
 import SidebarMenu from "../components/SidebarMenu.jsx";
 import Header from "../components/Header.jsx";
 import MainContent from "../components/MainContent.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const userType = localStorage.getItem("currentUser")
     ? JSON.parse(localStorage.getItem("currentUser")).userType
     : null;
 
+  useEffect(() => {
+    // Only redirect if we're currently on /dashboard
+    if (userType && userType === "student") {
+      navigate("/dashboard/studentdashboard");
+    }
+  }, []);
+
   const allMenuItems = [
-    // COMMON
+  
+    // ADMIN
     {
       id: "dashboard",
       label: "Dashboard",
       icon: BarChart3,
       route: "/dashboard",
-      access: ["admin", "student"],
+      access: ["admin"],
     },
-    
-    {
-      id: "profile",
-      label: "View Profile",
-      icon: User,
-      route: "/dashboard/profile",
-      access: ["admin", "student"],
-    },
-
-    // ADMIN
     {
       id: "courses",
       label: "Courses",
       icon: FileText,
       route: "/dashboard/coursesadmin",
+      access: ["admin"],
+    },
+    {
+      id: "profile",
+      label: "View Profile",
+      icon: User,
+      route: "/dashboard/profile",
       access: ["admin"],
     },
     {
@@ -65,6 +73,20 @@ const Dashboard = () => {
     },
 
     // STUDENT
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: BarChart3,
+      route: "/dashboard/studentdashboard",
+      access: ["student"],
+    },
+    {
+      id: "profile",
+      label: "View Profile",
+      icon: User,
+      route: "/dashboard/studentprofile",
+      access: ["student"],
+    },
     {
       id: "terms",
       label: "Term Selection",

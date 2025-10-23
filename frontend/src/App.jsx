@@ -24,8 +24,9 @@ import StudentCourseRegistration from "./components/StudentCourseRegistration.js
 import StudentTermSelection from "./components/StudentTermSelection.jsx";
 import StudentContactAdmin from "./components/StudentContactAdmin.jsx";
 import StudentMyCourses from "./components/StudentMyCourses.jsx";
-import StudentDashboard from "./components/StudentDashboard.jsx";
-import ProfilePage from "./components/StudentProfile.jsx";
+import CourseRegistrationCart from "./components/StudentCourseCart.jsx";
+import StudentDashboard from "./components/StudentDashboard.jsx"
+import StudentProfile from "./components/StudentProfile.jsx"
 
 function App() {
   // Load Tailwind CSS
@@ -43,20 +44,22 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/programs" element={<Programs />} />
-        <Route path="/dashboard" element={<Dashboard/>}>
+        <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardAdmin />} />
-          <Route path="profile" element={<AdminProfile />} />
           <Route path="profile" element={<AdminProfile />} />
           <Route path="coursesadmin" element={<SearchCourses />} />                                
           <Route path="courseForm" element={<AdminCourseForm />} />
           <Route path="students" element={<RegisteredStudents />} />
           <Route path="my-courses" element={<StudentMyCourses />} />
           <Route path="courseregistration" element={<StudentCourseRegistration />} />
+          <Route path="coursecart" element={<CourseRegistrationCart />} />
           <Route path="forms" element={<SubmittedForms />} />          
-          <Route path="terms" element={<StudentTermSelection/>} />          
+          <Route path="terms" element={<StudentTermSelection />} />          
           <Route path="contact" element={<StudentContactAdmin />} />          
+          <Route path="studentdashboard" element={<StudentDashboard />} />          
+          <Route path="studentprofile" element={<StudentProfile />} />          
         </Route>        
-        <Route path="dashboard" element={<StudentDashboard />}></Route>
+        <Route path="*" element={<Navigate to="/" replace />}></Route>
       </Routes>
     </HashRouter>
   );

@@ -1,7 +1,6 @@
 import React, { use } from "react";
 import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import DashboardAdmin from "../pages/DashboardAdmin";
 
 const MainContent = () => {  
 
