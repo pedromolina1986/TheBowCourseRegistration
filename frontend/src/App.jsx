@@ -44,7 +44,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<DashboardAdmin />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="courses" element={<SearchCourses />} />                                
+          <Route path="coursesadmin" element={<SearchCourses />} />                                
           <Route path="courseForm" element={<AdminCourseForm />} />
           <Route path="students" element={<RegisteredStudents />} />
           <Route path="my-courses" element={<StudentMyCourses />} />

@@ -1,13 +1,6 @@
 import React, { useState } from "react";
-import {
-  Search,
-  RotateCcw,
-  Grid,
-  List,
-  Eye,
-  Edit,
-  Trash2
-} from "lucide-react";
+import { Search, RotateCcw, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const initialCoursesData = [
   {
@@ -73,18 +66,20 @@ const initialCoursesData = [
 ];
 
 const SearchCourses = () => {
+  const navigate = useNavigate();
+
   const [viewMode, setViewMode] = useState("list");
   const [courses, setCourses] = useState(initialCoursesData);
-  
+
   // Filter states
   const [searchText, setSearchText] = useState("");
   const [programFilter, setProgramFilter] = useState("All Programs");
   const [termFilter, setTermFilter] = useState("All Terms");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
-  
+
   // Sort state
   const [sortBy, setSortBy] = useState("name");
-  
+
   // Delete confirmation state
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
@@ -224,7 +219,8 @@ const SearchCourses = () => {
             <span className="font-medium">Clear Filters</span>
           </button>
           <div className="ml-auto text-sm text-gray-600">
-            Found {filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}
+            Found {filteredCourses.length} course
+            {filteredCourses.length !== 1 ? "s" : ""}
           </div>
         </div>
       </div>
@@ -237,7 +233,7 @@ const SearchCourses = () => {
             Search Results
           </h3>
           <div className="flex items-center gap-3">
-            <select 
+            <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -373,6 +369,9 @@ const SearchCourses = () => {
                         <button
                           className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                           title="View"
+                          onClick={() => {
+                            navigate(`/dashboard/courseForm`);
+                          }}
                         >
                           <Eye size={16} className="text-gray-600" />
                         </button>
@@ -380,6 +379,9 @@ const SearchCourses = () => {
                         <button
                           className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                           title="Edit"
+                          onClick={() => {
+                            navigate(`/dashboard/courseForm`);
+                          }}
                         >
                           <Edit size={16} className="text-gray-600" />
                         </button>
@@ -441,7 +443,9 @@ const SearchCourses = () => {
                     <div className="space-y-3 mb-4">
                       <div>
                         <p className="text-xs text-gray-500 mb-0.5">Program</p>
-                        <p className="text-sm text-gray-900">{course.program}</p>
+                        <p className="text-sm text-gray-900">
+                          {course.program}
+                        </p>
                       </div>
 
                       <div>
@@ -455,8 +459,12 @@ const SearchCourses = () => {
                       </div>
 
                       <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Instructor</p>
-                        <p className="text-sm text-gray-900">{course.instructor}</p>
+                        <p className="text-xs text-gray-500 mb-0.5">
+                          Instructor
+                        </p>
+                        <p className="text-sm text-gray-900">
+                          {course.instructor}
+                        </p>
                       </div>
 
                       <div>
@@ -476,12 +484,16 @@ const SearchCourses = () => {
                     <div className="flex items-center gap-2 pt-3 border-t border-gray-200">
                       <button
                         className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => {
+                          navigate(`/dashboard/courseForm`);
+                        }}
                       >
                         <Eye size={14} className="text-gray-600" />
                         View
                       </button>
                       <button
                         className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                        onClick={() => navigate(`/dashboard/courseForm`)}
                       >
                         <Edit size={14} className="text-gray-600" />
                         Edit
@@ -503,7 +515,8 @@ const SearchCourses = () => {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing 1-{filteredCourses.length} of {filteredCourses.length} courses
+            Showing 1-{filteredCourses.length} of {filteredCourses.length}{" "}
+            courses
           </p>
           <div className="flex items-center gap-2">
             <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
@@ -533,7 +546,8 @@ const SearchCourses = () => {
               Delete Course
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this course? This action cannot be undone.
+              Are you sure you want to delete this course? This action cannot be
+              undone.
             </p>
             <div className="flex items-center gap-3 justify-end">
               <button

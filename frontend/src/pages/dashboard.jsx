@@ -13,7 +13,7 @@ const Dashboard = () => {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, route: '/dashboard', access: ["admin","student"] },    
     { id: 'profile', label: 'View Profile', icon: User , route: '/dashboard/profile', access: ["admin","student"]  },
     //ADMIN    
-    { id: 'courses', label: 'Courses', icon: FileText, route: '/dashboard/courses', access: ["admin"] },    
+    { id: 'courses', label: 'Courses', icon: FileText, route: '/dashboard/coursesadmin', access: ["admin"] },    
     { id: 'students', label: 'Registered Students', icon: Users, route: '/dashboard/students', access: ["admin"] },
     { id: 'forms', label: 'Submitted Forms', icon: Mail, route: '/dashboard/forms', access: ["admin"] },    
     //STUDENT
