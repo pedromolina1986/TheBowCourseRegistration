@@ -46,7 +46,7 @@ const StudentTermSelection = () => {
     navigate("/dashboard/courseregistration", { state: { selectedTerm } });
   };
 
-  // 🔹 Back to Student Dashboard
+  // 🔹 Back to Student Dashboard need to navigate this 
   const handleBack = () => {
     navigate("/dashboard");
   };

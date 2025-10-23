@@ -32,6 +32,7 @@ const Dashboard = () => {
       route: "/dashboard",
       access: ["admin", "student"],
     },
+    
     {
       id: "profile",
       label: "View Profile",
