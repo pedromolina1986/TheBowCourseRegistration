@@ -6,17 +6,14 @@ const Header = () => {
   const location = useLocation();
 
   // Show a different header on the dashboard page
-  if (location.pathname === '/dashboard') {
+  if (location.pathname.includes('/dashboard')) {
     return (
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-white backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Welcome back, John Smith. Here's an overview of the SD department.
-          </p>
+          <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>          
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">Administrator</span>
+          <span className="text-sm text-gray-600">{JSON.parse(localStorage.getItem("currentUser")).username}</span>
           <button className="p-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 transform hover:scale-105">
             <Bell size={20} />
           </button>
