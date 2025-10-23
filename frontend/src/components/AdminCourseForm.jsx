@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Search, X, Plus, Save, Eye, Trash2 } from 'lucide-react';
+import { RefreshCw, Search, X, Plus, Save, Trash2 } from 'lucide-react';
 
 const initialCourses = [
   { code: 'CS101', name: 'Introduction to Programming', term: 'Winter 2025', program: 'Software Development - Diploma', description: 'This course introduces students to fundamental programming concepts using modern programming languages. Students will learn basic programming constructs, problem-solving techniques, and software development practices.', startDate: '2025-01-15', endDate: '2025-04-30', credits: 3, maxEnrollment: 30, status: 'Active', instructor: 'Dr. Sarah Johnson', location: 'Room 201, Building A', prerequisites: ['High School Mathematics', 'Basic Computer Skills'] },
@@ -7,6 +7,22 @@ const initialCourses = [
   { code: 'CS301', name: 'Database Systems', term: 'Summer 2025', program: 'Software Development - Post-Diploma', description: 'Comprehensive introduction to database design, SQL, and database management systems.', startDate: '2025-06-01', endDate: '2025-09-30', credits: 3, maxEnrollment: 35, status: 'Active', instructor: 'Dr. Emily Williams', location: 'Room 102, Building C', prerequisites: ['CS201'] },
   { code: 'CS401', name: 'Web Development', term: 'Fall 2025', program: 'Software Development - Certificate', description: 'Modern web development using HTML, CSS, JavaScript, and popular frameworks.', startDate: '2025-09-15', endDate: '2025-12-20', credits: 4, maxEnrollment: 40, status: 'Draft', instructor: 'Prof. David Park', location: 'Room 401, Building A', prerequisites: ['CS101', 'CS201'] }
 ];
+
+const emptyCourseTe = {
+  code: '',
+  name: '',
+  term: 'Winter 2025',
+  program: 'Software Development - Diploma',
+  description: '',
+  startDate: '',
+  endDate: '',
+  credits: 3,
+  maxEnrollment: 30,
+  status: 'Draft',
+  instructor: 'Dr. Sarah Johnson',
+  location: '',
+  prerequisites: []
+};
 
 const EditCourse = () => {
   const [availableCourses, setAvailableCourses] = useState(initialCourses);
@@ -16,6 +32,7 @@ const EditCourse = () => {
   const [saveMessage, setSaveMessage] = useState('');
   const [showPrereqModal, setShowPrereqModal] = useState(false);
   const [selectedPrereq, setSelectedPrereq] = useState('');
+  const [isNewCourse, setIsNewCourse] = useState(false);
 
   const filteredCourses = availableCourses.filter(course =>
     course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -32,7 +49,15 @@ const EditCourse = () => {
       setCourseData({ ...course });
       setSelectedCourseCode(courseCode);
       setSaveMessage('');
+      setIsNewCourse(false);
     }
+  };
+
+  const handleNewCourse = () => {
+    setCourseData({ ...emptyCourseTe });
+    setSelectedCourseCode('');
+    setSaveMessage('');
+    setIsNewCourse(true);
   };
 
   const handleFieldChange = (field, value) => {
@@ -57,20 +82,85 @@ const EditCourse = () => {
     }
   };
 
+  const validateCourse = () => {
+    if (!courseData.code.trim()) {
+      alert('Course code is required');
+      return false;
+    }
+    if (!courseData.name.trim()) {
+      alert('Course name is required');
+      return false;
+    }
+    if (!courseData.description.trim()) {
+      alert('Course description is required');
+      return false;
+    }
+    if (!courseData.startDate) {
+      alert('Start date is required');
+      return false;
+    }
+    if (!courseData.endDate) {
+      alert('End date is required');
+      return false;
+    }
+    
+    // Check if course code already exists (only for new courses)
+    if (isNewCourse && availableCourses.some(c => c.code === courseData.code)) {
+      alert('A course with this code already exists');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSave = () => {
-    const updatedCourses = availableCourses.map(course => 
-      course.code === selectedCourseCode ? { ...courseData } : course
-    );
-    setAvailableCourses(updatedCourses);
-    setSaveMessage('Changes saved successfully!');
+    if (!validateCourse()) return;
+
+    if (isNewCourse) {
+      // Add new course
+      setAvailableCourses([...availableCourses, { ...courseData }]);
+      setSelectedCourseCode(courseData.code);
+      setIsNewCourse(false);
+      setSaveMessage('New course created successfully!');
+    } else {
+      // Update existing course
+      const updatedCourses = availableCourses.map(course => 
+        course.code === selectedCourseCode ? { ...courseData } : course
+      );
+      setAvailableCourses(updatedCourses);
+      setSaveMessage('Changes saved successfully!');
+    }
+    
     setTimeout(() => setSaveMessage(''), 3000);
     console.log('Saved course data:', courseData);
   };
 
   const handleDelete = () => {
     if (confirm('Are you sure you want to delete ' + courseData.code + '?')) {
-      alert('Course deleted successfully!');
+      const updatedCourses = availableCourses.filter(c => c.code !== courseData.code);
+      setAvailableCourses(updatedCourses);
+      
+      if (updatedCourses.length > 0) {
+        handleCourseSelect(updatedCourses[0].code);
+      } else {
+        handleNewCourse();
+      }
+      
+      setSaveMessage('Course deleted successfully!');
+      setTimeout(() => setSaveMessage(''), 3000);
     }
+  };
+
+  const handleCancel = () => {
+    if (isNewCourse && availableCourses.length > 0) {
+      handleCourseSelect(availableCourses[0].code);
+    } else if (!isNewCourse) {
+      const originalCourse = availableCourses.find(c => c.code === selectedCourseCode);
+      if (originalCourse) {
+        setCourseData({ ...originalCourse });
+      }
+    }
+    setSaveMessage('');
   };
 
   return (
@@ -80,12 +170,22 @@ const EditCourse = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Available Courses</h3>
-              <button 
-                onClick={() => setSearchTerm('')}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
-              >
-                <RefreshCw size={18} className="text-gray-600" />
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={handleNewCourse}
+                  className="p-1 hover:bg-blue-50 rounded transition-colors text-blue-600"
+                  title="Add New Course"
+                >
+                  <Plus size={18} />
+                </button>
+                <button 
+                  onClick={() => setSearchTerm('')}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  title="Refresh"
+                >
+                  <RefreshCw size={18} className="text-gray-600" />
+                </button>
+              </div>
             </div>
             
             <div className="p-4 border-b border-gray-200">
@@ -102,19 +202,27 @@ const EditCourse = () => {
             </div>
 
             <div className="p-2">
+              {isNewCourse && (
+                <button
+                  className="w-full text-left p-3 rounded-lg mb-1 transition-colors bg-blue-600 text-white"
+                >
+                  <p className="font-medium text-sm">New Course</p>
+                  <p className="text-xs mt-0.5 text-blue-100">Click to create</p>
+                </button>
+              )}
               {filteredCourses.map((course, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleCourseSelect(course.code)}
-                  className={'w-full text-left p-3 rounded-lg mb-1 transition-colors ' + (selectedCourseCode === course.code ? 'bg-gray-900 text-white' : 'hover:bg-gray-50')}
+                  className={'w-full text-left p-3 rounded-lg mb-1 transition-colors ' + (selectedCourseCode === course.code && !isNewCourse ? 'bg-gray-900 text-white' : 'hover:bg-gray-50')}
                 >
-                  <p className={'font-medium text-sm ' + (selectedCourseCode === course.code ? 'text-white' : 'text-gray-900')}>
+                  <p className={'font-medium text-sm ' + (selectedCourseCode === course.code && !isNewCourse ? 'text-white' : 'text-gray-900')}>
                     {course.code}
                   </p>
-                  <p className={'text-xs mt-0.5 ' + (selectedCourseCode === course.code ? 'text-gray-300' : 'text-gray-600')}>
+                  <p className={'text-xs mt-0.5 ' + (selectedCourseCode === course.code && !isNewCourse ? 'text-gray-300' : 'text-gray-600')}>
                     {course.name}
                   </p>
-                  <p className={'text-xs mt-0.5 ' + (selectedCourseCode === course.code ? 'text-gray-400' : 'text-gray-500')}>
+                  <p className={'text-xs mt-0.5 ' + (selectedCourseCode === course.code && !isNewCourse ? 'text-gray-400' : 'text-gray-500')}>
                     {course.term}
                   </p>
                 </button>
@@ -126,18 +234,37 @@ const EditCourse = () => {
         <div className="col-span-2">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Course Details</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {isNewCourse ? 'New Course' : 'Course Details'}
+              </h3>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  Last updated: Dec 20, 2024
-                </div>
+                {!isNewCourse && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    Last updated: Dec 20, 2024
+                  </div>
+                )}
+                <button 
+                  onClick={handleCancel}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm"
+                >
+                  Cancel
+                </button>
+                {!isNewCourse && (
+                  <button 
+                    onClick={handleDelete}
+                    className="px-4 py-2 border border-red-300 text-red-600 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                )}
                 <button 
                   onClick={handleSave}
                   className="bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   <Save size={16} />
-                  Save Changes
+                  {isNewCourse ? 'Create Course' : 'Save Changes'}
                 </button>
               </div>
             </div>
@@ -159,6 +286,7 @@ const EditCourse = () => {
                     value={courseData.code}
                     onChange={(e) => handleFieldChange('code', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., CS101"
                   />
                 </div>
                 <div>
@@ -170,6 +298,7 @@ const EditCourse = () => {
                     value={courseData.name}
                     onChange={(e) => handleFieldChange('name', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Introduction to Programming"
                   />
                 </div>
               </div>
@@ -215,6 +344,7 @@ const EditCourse = () => {
                   value={courseData.description}
                   onChange={(e) => handleFieldChange('description', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  placeholder="Enter a detailed description of the course..."
                 ></textarea>
               </div>
 
@@ -249,8 +379,10 @@ const EditCourse = () => {
                   <input
                     type="number"
                     value={courseData.credits}
-                    onChange={(e) => handleFieldChange('credits', parseInt(e.target.value))}
+                    onChange={(e) => handleFieldChange('credits', parseInt(e.target.value) || 0)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="1"
+                    max="6"
                   />
                 </div>
                 <div>
@@ -258,8 +390,9 @@ const EditCourse = () => {
                   <input
                     type="number"
                     value={courseData.maxEnrollment}
-                    onChange={(e) => handleFieldChange('maxEnrollment', parseInt(e.target.value))}
+                    onChange={(e) => handleFieldChange('maxEnrollment', parseInt(e.target.value) || 0)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    min="1"
                   />
                 </div>
                 <div>
@@ -297,6 +430,7 @@ const EditCourse = () => {
                     value={courseData.location}
                     onChange={(e) => handleFieldChange('location', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Room 201, Building A"
                   />
                 </div>
               </div>
@@ -324,8 +458,6 @@ const EditCourse = () => {
                   Add Prerequisite
                 </button>
               </div>
-
-
             </div>
           </div>
         </div>
