@@ -195,11 +195,7 @@ const RegisteredStudents = () => {
             className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Search
-          </button>
-          <button className="bg-white text-gray-700 px-6 py-2.5 rounded-lg border border-gray-300 flex items-center gap-2 hover:bg-gray-50 transition-colors">
-            <Download size={18} />
-            <span className="font-medium">Export</span>
-          </button>
+          </button>          
         </div>
       </div>
 

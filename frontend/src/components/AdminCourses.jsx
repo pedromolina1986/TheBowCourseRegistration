@@ -8,7 +8,6 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const initialCoursesData = [
   {
@@ -83,29 +82,45 @@ const SearchCourses = () => {
   const [termFilter, setTermFilter] = useState("All Terms");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   
+  // Sort state
+  const [sortBy, setSortBy] = useState("name");
+  
   // Delete confirmation state
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const navigate = useNavigate();
+  // Filter and sort courses
+  const filteredCourses = courses
+    .filter((course) => {
+      const matchesSearch =
+        searchText === "" ||
+        course.code.toLowerCase().includes(searchText.toLowerCase()) ||
+        course.name.toLowerCase().includes(searchText.toLowerCase());
 
-  // Filter courses based on all filters
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch =
-      searchText === "" ||
-      course.code.toLowerCase().includes(searchText.toLowerCase()) ||
-      course.name.toLowerCase().includes(searchText.toLowerCase());
+      const matchesProgram =
+        programFilter === "All Programs" || course.program === programFilter;
 
-    const matchesProgram =
-      programFilter === "All Programs" || course.program === programFilter;
+      const matchesTerm =
+        termFilter === "All Terms" || course.term === termFilter;
 
-    const matchesTerm =
-      termFilter === "All Terms" || course.term === termFilter;
+      const matchesStatus =
+        statusFilter === "All Statuses" || course.status === statusFilter;
 
-    const matchesStatus =
-      statusFilter === "All Statuses" || course.status === statusFilter;
-
-    return matchesSearch && matchesProgram && matchesTerm && matchesStatus;
-  });
+      return matchesSearch && matchesProgram && matchesTerm && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "code":
+          return a.code.localeCompare(b.code);
+        case "term":
+          return a.term.localeCompare(b.term);
+        case "enrollment":
+          return b.enrollment.current - a.enrollment.current;
+        default:
+          return 0;
+      }
+    });
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -122,7 +137,7 @@ const SearchCourses = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-8 bg-gray-50 min-h-screen">
       {/* Search Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="grid grid-cols-4 gap-4 mb-4">
@@ -222,11 +237,15 @@ const SearchCourses = () => {
             Search Results
           </h3>
           <div className="flex items-center gap-3">
-            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option>Sort by Name</option>
-              <option>Sort by Code</option>
-              <option>Sort by Term</option>
-              <option>Sort by Enrollment</option>
+            <select 
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="code">Sort by Code</option>
+              <option value="term">Sort by Term</option>
+              <option value="enrollment">Sort by Enrollment</option>
             </select>
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
               <button
@@ -253,88 +272,157 @@ const SearchCourses = () => {
           </div>
         </div>
 
-        {/* Table Header */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase">
-            <div className="col-span-3">Course Details</div>
-            <div className="col-span-2">Program</div>
-            <div className="col-span-2">Term & Duration</div>
-            <div className="col-span-2">Enrollment</div>
-            <div className="col-span-2">Instructor</div>
-            <div className="col-span-1">Status</div>
-          </div>
-        </div>
-
-        {/* Course List */}
-        <div className="divide-y divide-gray-200">
-          {filteredCourses.length === 0 ? (
-            <div className="px-6 py-12 text-center text-gray-500">
-              No courses found matching your filters.
+        {/* Table Header - Only show in list view */}
+        {viewMode === "list" && (
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase">
+              <div className="col-span-3">Course Details</div>
+              <div className="col-span-2">Program</div>
+              <div className="col-span-2">Term & Duration</div>
+              <div className="col-span-2">Enrollment</div>
+              <div className="col-span-2">Instructor</div>
+              <div className="col-span-1">Status</div>
             </div>
-          ) : (
-            filteredCourses.map((course) => {
-              const enrollmentPercentage =
-                (course.enrollment.current / course.enrollment.max) * 100;
-              return (
-                <div
-                  key={course.id}
-                  className="px-6 py-4 hover:bg-gray-50 transition-colors"
-                >
-                  <div className="grid grid-cols-12 gap-4 items-center">
-                    {/* Course Details */}
-                    <div className="col-span-3">
-                      <p className="font-semibold text-gray-900">
-                        {course.code}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-0.5">
-                        {course.name}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {course.credits} Credits
-                      </p>
-                    </div>
+          </div>
+        )}
 
-                    {/* Program */}
-                    <div className="col-span-2">
-                      <span className="text-sm text-gray-900">
-                        {course.program}
-                      </span>
-                    </div>
+        {/* Course List/Grid */}
+        {viewMode === "list" ? (
+          <div className="divide-y divide-gray-200">
+            {filteredCourses.length === 0 ? (
+              <div className="px-6 py-12 text-center text-gray-500">
+                No courses found matching your filters.
+              </div>
+            ) : (
+              filteredCourses.map((course) => {
+                const enrollmentPercentage =
+                  (course.enrollment.current / course.enrollment.max) * 100;
+                return (
+                  <div
+                    key={course.id}
+                    className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="grid grid-cols-12 gap-4 items-center">
+                      {/* Course Details */}
+                      <div className="col-span-3">
+                        <p className="font-semibold text-gray-900">
+                          {course.code}
+                        </p>
+                        <p className="text-sm text-gray-600 mt-0.5">
+                          {course.name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {course.credits} Credits
+                        </p>
+                      </div>
 
-                    {/* Term & Duration */}
-                    <div className="col-span-2">
-                      <p className="text-sm font-medium text-gray-900">
-                        {course.term}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {course.dates}
-                      </p>
-                    </div>
+                      {/* Program */}
+                      <div className="col-span-2">
+                        <span className="text-sm text-gray-900">
+                          {course.program}
+                        </span>
+                      </div>
 
-                    {/* Enrollment */}
-                    <div className="col-span-2">
-                      <p className="text-sm font-medium text-gray-900 mb-1">
-                        {course.enrollment.current}/{course.enrollment.max}
-                      </p>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gray-900 h-2 rounded-full"
-                          style={{ width: `${enrollmentPercentage}%` }}
-                        ></div>
+                      {/* Term & Duration */}
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-gray-900">
+                          {course.term}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {course.dates}
+                        </p>
+                      </div>
+
+                      {/* Enrollment */}
+                      <div className="col-span-2">
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          {course.enrollment.current}/{course.enrollment.max}
+                        </p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gray-900 h-2 rounded-full"
+                            style={{ width: `${enrollmentPercentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      {/* Instructor */}
+                      <div className="col-span-2">
+                        <span className="text-sm text-gray-900">
+                          {course.instructor}
+                        </span>
+                      </div>
+
+                      {/* Status */}
+                      <div className="col-span-1">
+                        <span
+                          className={`inline-block px-2.5 py-1 rounded text-xs font-medium ${
+                            course.status === "Active"
+                              ? "bg-green-100 text-green-700"
+                              : course.status === "Draft"
+                              ? "bg-gray-100 text-gray-700"
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {course.status}
+                        </span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="col-span-1 flex items-center justify-center gap-2">
+                        <button
+                          className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                          title="View"
+                        >
+                          <Eye size={16} className="text-gray-600" />
+                        </button>
+
+                        <button
+                          className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                          title="Edit"
+                        >
+                          <Edit size={16} className="text-gray-600" />
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-red-100 rounded transition-colors"
+                          title="Delete"
+                          onClick={() => setDeleteConfirm(course.id)}
+                        >
+                          <Trash2 size={16} className="text-red-600" />
+                        </button>
                       </div>
                     </div>
-
-                    {/* Instructor */}
-                    <div className="col-span-2">
-                      <span className="text-sm text-gray-900">
-                        {course.instructor}
-                      </span>
-                    </div>
-
-                    {/* Status */}
-                    <div className="col-span-1">
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCourses.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500 py-12">
+                No courses found matching your filters.
+              </div>
+            ) : (
+              filteredCourses.map((course) => {
+                const enrollmentPercentage =
+                  (course.enrollment.current / course.enrollment.max) * 100;
+                return (
+                  <div
+                    key={course.id}
+                    className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">
+                          {course.code}
+                        </h4>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {course.credits} Credits
+                        </p>
+                      </div>
                       <span
-                        className={`inline-block px-2.5 py-1 rounded text-xs font-medium ${
+                        className={`px-2.5 py-1 rounded text-xs font-medium ${
                           course.status === "Active"
                             ? "bg-green-100 text-green-700"
                             : course.status === "Draft"
@@ -346,37 +434,71 @@ const SearchCourses = () => {
                       </span>
                     </div>
 
-                    {/* Actions */}
-                    <div className="col-span-1 flex items-center justify-center gap-2">
-                      <button
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                        title="View"
-                        onClick={() => navigate("/dashboard/courseForm")}
-                      >
-                        <Eye size={16} className="text-gray-600" />
-                      </button>
+                    <h5 className="text-sm font-medium text-gray-900 mb-4">
+                      {course.name}
+                    </h5>
 
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-0.5">Program</p>
+                        <p className="text-sm text-gray-900">{course.program}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-0.5">Term</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {course.term}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          {course.dates}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-0.5">Instructor</p>
+                        <p className="text-sm text-gray-900">{course.instructor}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Enrollment</p>
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          {course.enrollment.current}/{course.enrollment.max}
+                        </p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gray-900 h-2 rounded-full"
+                            style={{ width: `${enrollmentPercentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-3 border-t border-gray-200">
                       <button
-                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                        title="Edit"
-                        onClick={() => navigate("/dashboard/courseForm")}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                       >
-                        <Edit size={16} className="text-gray-600" />
+                        <Eye size={14} className="text-gray-600" />
+                        View
                       </button>
                       <button
-                        className="p-1.5 hover:bg-red-100 rounded transition-colors"
-                        title="Delete"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Edit size={14} className="text-gray-600" />
+                        Edit
+                      </button>
+                      <button
+                        className="px-3 py-2 text-sm border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
                         onClick={() => setDeleteConfirm(course.id)}
                       >
-                        <Trash2 size={16} className="text-red-600" />
+                        <Trash2 size={14} className="text-red-600" />
                       </button>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
-        </div>
+                );
+              })
+            )}
+          </div>
+        )}
 
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
