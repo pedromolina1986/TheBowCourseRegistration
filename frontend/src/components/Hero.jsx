@@ -3,10 +3,10 @@ import WhiteButton from "./WhiteButton";
 
 
 const courseClick = () => {
-  window.location.href = '/courses'
+  window.location.href = '#/courses'
 }
 const programClick = () => {
-  window.location.href = '/programs'
+  window.location.href = '#/programs'
 }
 const Hero = () => (
   

@@ -8,7 +8,7 @@ const Courses = () => {
   const [selectedTerm, setSelectedTerm] = useState('All Terms');
 
   const loadMoreClick = () => {
-    window.location.href = '/courses'
+    window.location.href = '#/courses'
   }
 
   const courses = [
