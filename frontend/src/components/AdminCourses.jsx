@@ -6,13 +6,13 @@ import {
   List,
   Eye,
   Edit,
-  Trash2,
-  Link,
+  Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const coursesData = [
+const initialCoursesData = [
   {
+    id: 1,
     code: "SDEV-101",
     name: "Introduction to Programming",
     credits: 3,
@@ -24,6 +24,7 @@ const coursesData = [
     status: "Active",
   },
   {
+    id: 2,
     code: "SDEV-201",
     name: "Advanced JavaScript Development",
     credits: 4,
@@ -35,6 +36,7 @@ const coursesData = [
     status: "Active",
   },
   {
+    id: 3,
     code: "SDEV-150",
     name: "Database Fundamentals",
     credits: 3,
@@ -46,6 +48,7 @@ const coursesData = [
     status: "Draft",
   },
   {
+    id: 4,
     code: "SDEV-301",
     name: "Full Stack Web Development",
     credits: 5,
@@ -57,6 +60,7 @@ const coursesData = [
     status: "Active",
   },
   {
+    id: 5,
     code: "SDEV-250",
     name: "Mobile App Development",
     credits: 4,
@@ -71,7 +75,51 @@ const coursesData = [
 
 const SearchCourses = () => {
   const [viewMode, setViewMode] = useState("list");
+  const [courses, setCourses] = useState(initialCoursesData);
+  
+  // Filter states
+  const [searchText, setSearchText] = useState("");
+  const [programFilter, setProgramFilter] = useState("All Programs");
+  const [termFilter, setTermFilter] = useState("All Terms");
+  const [statusFilter, setStatusFilter] = useState("All Statuses");
+  
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
   const navigate = useNavigate();
+
+  // Filter courses based on all filters
+  const filteredCourses = courses.filter((course) => {
+    const matchesSearch =
+      searchText === "" ||
+      course.code.toLowerCase().includes(searchText.toLowerCase()) ||
+      course.name.toLowerCase().includes(searchText.toLowerCase());
+
+    const matchesProgram =
+      programFilter === "All Programs" || course.program === programFilter;
+
+    const matchesTerm =
+      termFilter === "All Terms" || course.term === termFilter;
+
+    const matchesStatus =
+      statusFilter === "All Statuses" || course.status === statusFilter;
+
+    return matchesSearch && matchesProgram && matchesTerm && matchesStatus;
+  });
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearchText("");
+    setProgramFilter("All Programs");
+    setTermFilter("All Terms");
+    setStatusFilter("All Statuses");
+  };
+
+  // Delete course
+  const handleDelete = (courseId) => {
+    setCourses(courses.filter((course) => course.id !== courseId));
+    setDeleteConfirm(null);
+  };
 
   return (
     <div className="p-8">
@@ -91,6 +139,8 @@ const SearchCourses = () => {
               <input
                 type="text"
                 placeholder="Enter course name or code"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -101,7 +151,11 @@ const SearchCourses = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Program
             </label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select
+              value={programFilter}
+              onChange={(e) => setProgramFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option>All Programs</option>
               <option>Diploma</option>
               <option>Post-Diploma</option>
@@ -114,7 +168,11 @@ const SearchCourses = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Term
             </label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select
+              value={termFilter}
+              onChange={(e) => setTermFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option>All Terms</option>
               <option>Winter 2025</option>
               <option>Spring 2025</option>
@@ -128,7 +186,11 @@ const SearchCourses = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Status
             </label>
-            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
               <option>All Statuses</option>
               <option>Active</option>
               <option>Draft</option>
@@ -139,15 +201,16 @@ const SearchCourses = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <button className="bg-gray-900 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
-            <Search size={18} />
-            <span className="font-medium">Search Courses</span>
-          </button>
-          <button className="bg-white text-gray-700 px-6 py-2.5 rounded-lg border border-gray-300 flex items-center gap-2 hover:bg-gray-50 transition-colors">
+          <button
+            onClick={handleClearFilters}
+            className="bg-white text-gray-700 px-6 py-2.5 rounded-lg border border-gray-300 flex items-center gap-2 hover:bg-gray-50 transition-colors"
+          >
             <RotateCcw size={18} />
             <span className="font-medium">Clear Filters</span>
           </button>
-          <div className="ml-auto text-sm text-gray-600">Found 24 courses</div>
+          <div className="ml-auto text-sm text-gray-600">
+            Found {filteredCourses.length} course{filteredCourses.length !== 1 ? "s" : ""}
+          </div>
         </div>
       </div>
 
@@ -199,116 +262,127 @@ const SearchCourses = () => {
             <div className="col-span-2">Enrollment</div>
             <div className="col-span-2">Instructor</div>
             <div className="col-span-1">Status</div>
-            <div className="col-span-1 text-center">Actions</div>
           </div>
         </div>
 
         {/* Course List */}
         <div className="divide-y divide-gray-200">
-          {coursesData.map((course, idx) => {
-            const enrollmentPercentage =
-              (course.enrollment.current / course.enrollment.max) * 100;
-            return (
-              <div
-                key={idx}
-                className="px-6 py-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="grid grid-cols-12 gap-4 items-center">
-                  {/* Course Details */}
-                  <div className="col-span-3">
-                    <p className="font-semibold text-gray-900">{course.code}</p>
-                    <p className="text-sm text-gray-600 mt-0.5">
-                      {course.name}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {course.credits} Credits
-                    </p>
-                  </div>
+          {filteredCourses.length === 0 ? (
+            <div className="px-6 py-12 text-center text-gray-500">
+              No courses found matching your filters.
+            </div>
+          ) : (
+            filteredCourses.map((course) => {
+              const enrollmentPercentage =
+                (course.enrollment.current / course.enrollment.max) * 100;
+              return (
+                <div
+                  key={course.id}
+                  className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="grid grid-cols-12 gap-4 items-center">
+                    {/* Course Details */}
+                    <div className="col-span-3">
+                      <p className="font-semibold text-gray-900">
+                        {course.code}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-0.5">
+                        {course.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {course.credits} Credits
+                      </p>
+                    </div>
 
-                  {/* Program */}
-                  <div className="col-span-2">
-                    <span className="text-sm text-gray-900">
-                      {course.program}
-                    </span>
-                  </div>
+                    {/* Program */}
+                    <div className="col-span-2">
+                      <span className="text-sm text-gray-900">
+                        {course.program}
+                      </span>
+                    </div>
 
-                  {/* Term & Duration */}
-                  <div className="col-span-2">
-                    <p className="text-sm font-medium text-gray-900">
-                      {course.term}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {course.dates}
-                    </p>
-                  </div>
+                    {/* Term & Duration */}
+                    <div className="col-span-2">
+                      <p className="text-sm font-medium text-gray-900">
+                        {course.term}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {course.dates}
+                      </p>
+                    </div>
 
-                  {/* Enrollment */}
-                  <div className="col-span-2">
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      {course.enrollment.current}/{course.enrollment.max}
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gray-900 h-2 rounded-full"
-                        style={{ width: `${enrollmentPercentage}%` }}
-                      ></div>
+                    {/* Enrollment */}
+                    <div className="col-span-2">
+                      <p className="text-sm font-medium text-gray-900 mb-1">
+                        {course.enrollment.current}/{course.enrollment.max}
+                      </p>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gray-900 h-2 rounded-full"
+                          style={{ width: `${enrollmentPercentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Instructor */}
+                    <div className="col-span-2">
+                      <span className="text-sm text-gray-900">
+                        {course.instructor}
+                      </span>
+                    </div>
+
+                    {/* Status */}
+                    <div className="col-span-1">
+                      <span
+                        className={`inline-block px-2.5 py-1 rounded text-xs font-medium ${
+                          course.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : course.status === "Draft"
+                            ? "bg-gray-100 text-gray-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {course.status}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="col-span-1 flex items-center justify-center gap-2">
+                      <button
+                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                        title="View"
+                        onClick={() => navigate("/dashboard/courseForm")}
+                      >
+                        <Eye size={16} className="text-gray-600" />
+                      </button>
+
+                      <button
+                        className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                        title="Edit"
+                        onClick={() => navigate("/dashboard/courseForm")}
+                      >
+                        <Edit size={16} className="text-gray-600" />
+                      </button>
+                      <button
+                        className="p-1.5 hover:bg-red-100 rounded transition-colors"
+                        title="Delete"
+                        onClick={() => setDeleteConfirm(course.id)}
+                      >
+                        <Trash2 size={16} className="text-red-600" />
+                      </button>
                     </div>
                   </div>
-
-                  {/* Instructor */}
-                  <div className="col-span-2">
-                    <span className="text-sm text-gray-900">
-                      {course.instructor}
-                    </span>
-                  </div>
-
-                  {/* Status */}
-                  <div className="col-span-1">
-                    <span
-                      className={`inline-block px-2.5 py-1 rounded text-xs font-medium ${
-                        course.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : course.status === "Draft"
-                          ? "bg-gray-100 text-gray-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {course.status}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-1 flex items-center justify-center gap-2">
-                    <button
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                      title="View"
-                      onClick={() => navigate("/dashboard/courseForm")}
-                    >
-                      <Eye size={16} className="text-gray-600" />
-                    </button>
-
-                    <button
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                      title="Edit"
-                    >
-                      <Edit size={16} className="text-gray-600" />
-                    </button>
-                    <button
-                      className="p-1.5 hover:bg-gray-100 rounded transition-colors"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} className="text-gray-600" />
-                    </button>
-                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <p className="text-sm text-gray-600">Showing 1-5 of 24 courses</p>
+          <p className="text-sm text-gray-600">
+            Showing 1-{filteredCourses.length} of {filteredCourses.length} courses
+          </p>
           <div className="flex items-center gap-2">
             <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
               &lt;
@@ -328,6 +402,34 @@ const SearchCourses = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Delete Course
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this course? This action cannot be undone.
+            </p>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
