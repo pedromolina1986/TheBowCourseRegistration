@@ -47,23 +47,12 @@ function App() {
           <Route path="courses" element={<SearchCourses />} />                                
           <Route path="courseForm" element={<AdminCourseForm />} />
           <Route path="students" element={<RegisteredStudents />} />
-          <Route path="my-courses" element={<MyCourses />} />
-          <Route path="forms" element={<SubmittedForms />} />
-          <Route
-            path="create"
-            element={<div className="p-6">Create Courses Page</div>}
-          />
-          <Route
-            path="edit"
-            element={<div className="p-6">Edit Courses Page</div>}
-          />
-          <Route
-            path="search"
-            element={<StudentCourseRegistration/>}
-          />
-        </Route>
-        <Route path="term-selection" element={<StudentTermSelection />} />
-        <Route path="course-registration" element={<StudentCourseRegistration />} />
+          <Route path="my-courses" element={<StudentMyCourses />} />
+          <Route path="courseregistration" element={<StudentCourseRegistration />} />
+          <Route path="forms" element={<SubmittedForms />} />          
+          <Route path="terms" element={<StudentTermSelection />} />          
+          <Route path="contact" element={<StudentContactAdmin />} />          
+        </Route>        
         <Route path="*" element={<Navigate to="/dashboard" replace />}></Route>
       </Routes>
     </Router>

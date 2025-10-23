@@ -20,7 +20,7 @@ const Dashboard = () => {
     { id: 'terms', label: 'Term Selection', icon: GraduationCap, route: '/dashboard/terms', access: ["student"] },
     { id: 'courseRegistrations', label: 'Course Registration', icon: Plus, route: '/dashboard/courseregistration', access: ["student"]  },
     { id: 'my-courses', label: 'My Courses', icon: Edit , route: '/dashboard/my-courses', access: ["student"] },
-    { id: 'search', label: 'Search Courses', icon: Search, route: '/dashboard/search', access: ["student"]  },
+    //{ id: 'search', label: 'Search Courses', icon: Search, route: '/dashboard/search', access: ["student"]  },
     { id: 'contactAdmin', label: 'Contact Admin', icon: Contact, route: '/dashboard/contact', access: ["student"]  }    
   ];
 

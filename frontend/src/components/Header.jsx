@@ -10,7 +10,7 @@ const Header = () => {
     return (
       <header className="sticky top-0 z-50 bg-white backdrop-blur-sm border-b border-gray-100 shadow-sm px-8 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Administrator Dashboard</h1>          
+       
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">{JSON.parse(localStorage.getItem("currentUser")).username}</span>
