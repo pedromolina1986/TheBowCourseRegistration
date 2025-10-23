@@ -48,7 +48,7 @@ const StudentTermSelection = () => {
 
   // 🔹 Back to Student Dashboard need to navigate this
   const handleBack = () => {
-    navigate("/dashboard");
+    navigate("/dashboard/studentdashboard");
   };
 
   return (
