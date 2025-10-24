@@ -101,7 +101,6 @@ const StudentMyCourses = () => {
   const [addSelection, setAddSelection] = useState("");
   const [loaded, setLoaded] = useState(false);
 
-  // ✅ Load from localStorage — only initialize defaults on *first visit*
   useEffect(() => {
     const storedCourses = localStorage.getItem("studentCourses");
     if (storedCourses) {
@@ -117,15 +116,13 @@ const StudentMyCourses = () => {
     }
     setLoaded(true);
   }, []);
-
-  // ✅ Keep localStorage synced
+  
   useEffect(() => {
     if (loaded) {
       localStorage.setItem("studentCourses", JSON.stringify(courses));
     }
   }, [courses, loaded]);
 
-  // ✅ Drop single course
   const handleDrop = (code) => {
     if (window.confirm("Are you sure you want to drop this course?")) {
       const updated = courses.filter((course) => course.code !== code);
@@ -133,7 +130,6 @@ const StudentMyCourses = () => {
     }
   };
 
-  // ✅ Add selected course
   const handleAddCourse = () => {
     if (!addSelection) {
       alert("Please select a course to add!");
