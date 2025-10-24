@@ -40,7 +40,7 @@ const Hero = () => (
 
           </div>
         </div>
-        <img src="./public/Student.jpg.webp" alt="Student Learning Together" className="object-cover rounded-lg" /> 
+        <img src="/Student.jpg.webp" alt="Student Learning Together" className="object-cover rounded-lg" /> 
       </div>
     </div>
   </section>
