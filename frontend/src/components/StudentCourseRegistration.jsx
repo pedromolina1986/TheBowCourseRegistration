@@ -312,7 +312,7 @@ const StudentCourseRegistration = () => {
             {/* Apply Filters Button */}
             <div className="flex justify-end">
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 onClick={applyFilters}
               >
                 Apply Filters
@@ -370,8 +370,8 @@ const StudentCourseRegistration = () => {
                   disabled={course.availableSeats === 0}
                   className={`px-4 py-2 rounded-lg text-sm ${
                     course.availableSeats === 0
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-blue-600 text-white hover:bg-blue-700"
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:bg-blue-700"
                   }`}
                 >
                   Add to Cart

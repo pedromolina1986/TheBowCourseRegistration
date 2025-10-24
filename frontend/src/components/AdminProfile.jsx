@@ -160,7 +160,7 @@ const ProfileManagement = () => {
   }, []);
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
       {/* Responsive grid layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Card */}
@@ -201,7 +201,7 @@ const ProfileManagement = () => {
               {!isEditing ? (
                 <button
                   onClick={handleEdit}
-                  className="bg-gray-900 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors w-full sm:w-auto justify-center"
                 >
                   <Edit size={16} />
                   Edit Profile
@@ -217,7 +217,7 @@ const ProfileManagement = () => {
                   </button>
                   <button
                     onClick={handleSave}
-                    className="bg-gray-900 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 w-full sm:w-auto justify-center"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 w-full sm:w-auto justify-center"
                   >
                     <Save size={16} />
                     Save
@@ -308,9 +308,9 @@ const ProfileManagement = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-sm border border-gray-200">
             <div className="p-4 sm:p-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
             </div>
             <div className="p-4">
               {quickActions.map((action, idx) => {
@@ -319,11 +319,11 @@ const ProfileManagement = () => {
                   <button
                     key={idx}
                     onClick={() => handleQuickAction(action.action)}
-                    className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-102"
                   >
                     <div className="flex items-center gap-3">
-                      <Icon size={18} className="text-gray-600" />
-                      <span className="text-sm font-medium text-gray-900">{action.label}</span>
+                      <Icon size={18} className="text-white" />
+                      <span className="text-sm font-medium text-white">{action.label}</span>
                     </div>
                     <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

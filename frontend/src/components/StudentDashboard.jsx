@@ -41,10 +41,10 @@ const StudentDashboard = () => {
   ]);
 
   const stats = [
-    { title: "Registered Courses", value: courses.length, icon: <IoMdSchool /> },
-    { title: "Completed", value: 2, icon: <FaCheckCircle /> },
-    { title: "In Progress", value: 2, icon: <FaBookOpen /> },
-    { title: "Current Term", value: "Winter", icon: <FaCalendarAlt /> },
+    { title: "Registered Courses", value: courses.length, icon: <IoMdSchool />, colors:"text-blue-300" },
+    { title: "Completed", value: 2, icon: <FaCheckCircle />, colors:"text-green-300" },
+    { title: "In Progress", value: 2, icon: <FaBookOpen />, colors:"text-red-300" },
+    { title: "Current Term", value: "Winter", icon: <FaCalendarAlt />, colors:"text-purple-300" },
   ];
 
   const quickActions = [
@@ -58,7 +58,7 @@ const StudentDashboard = () => {
   const progressPercent = (completedCredits / totalCredits) * 100;
 
   return (
-    <div className="p-6 md:p-10 bg-gray-50 min-h-screen">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-6 md:p-10 bg-gray-50 min-h-screen">
       {/* Header */}
       <motion.div
         className="flex flex-col md:flex-row justify-between items-center mb-8"
@@ -98,7 +98,7 @@ const StudentDashboard = () => {
               <p className="text-sm text-gray-500">{item.title}</p>
               <h2 className="text-2xl font-bold text-gray-800">{item.value}</h2>
             </div>
-            <div className="text-blue-600 text-3xl">{item.icon}</div>
+            <div className={`${item.colors} text-3xl`}>{item.icon}</div>
           </motion.div>
         ))}
       </div>
@@ -144,25 +144,24 @@ const StudentDashboard = () => {
 
         {/* Quick Actions */}
         <motion.div
-          className="bg-white p-6 rounded-2xl shadow"
+          className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-2xl shadow"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <h2 className="text-white text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-3">
             {quickActions.map((action, i) => (
-              <motion.button
+              <button
                 key={i}
-                whileHover={{ scale: 1.03, backgroundColor: "#f3f4f6" }}
                 onClick={() => navigate(action.path)}
-                className="w-full flex justify-between items-center border p-3 rounded-xl text-left transition"
+                className="w-full flex justify-between items-center border p-3 rounded-xl text-white text-left transition-all duration-300 transform hover:bg-white hover:scale-103 hover:text-gray-900"
               >
-                <span className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                <span className="flex items-center gap-2 text-sm font-medium">
                   {action.icon} {action.name}
                 </span>
                 <span className="text-gray-400">›</span>
-              </motion.button>
+              </button>
             ))}
           </div>
         </motion.div>
@@ -177,9 +176,9 @@ const StudentDashboard = () => {
       >
         <h2 className="text-xl font-semibold mb-4">Program Progress</h2>
         <div className="mb-4">
-          <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-3 bg-blue-100 rounded-full overflow-hidden">
             <motion.div
-              className="h-3 bg-blue-600 rounded-full"
+              className="h-3 bg-gradient-to-r from-blue-600 to-purple-600  rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 1 }}

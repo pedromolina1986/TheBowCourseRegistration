@@ -64,10 +64,10 @@ const studentsData = [
 ];
 
 const stats = [
-  { label: "Total Students", value: "156", icon: Users },
-  { label: "Diploma Program", value: "68", icon: GraduationCap },
-  { label: "Post-Diploma", value: "45", icon: Award },
-  { label: "Certificate", value: "43", icon: Award },
+  { label: "Total Students", value: "156", icon: Users, colors:"text-blue-300" },
+  { label: "Diploma Program", value: "68", icon: GraduationCap, colors:"text-green-300" },
+  { label: "Post-Diploma", value: "45", icon: Award, colors:"text-purple-300" },
+  { label: "Certificate", value: "43", icon: Award, colors:"text-red-300" },
 ];
 
 const RegisteredStudents = () => {
@@ -168,14 +168,14 @@ const RegisteredStudents = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <button
             onClick={handleApplyFilters}
-            className="bg-gray-900 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
           >
             <Filter size={18} />
             <span className="font-medium">Apply Filters</span>
           </button>
           <button
             onClick={handleClearFilters}
-            className="text-gray-700 px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 rounded-lg transition-colors"
+            className="text-gray-700 border border-gray-200 px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <X size={18} />
             <span className="font-medium">Clear</span>
@@ -201,7 +201,7 @@ const RegisteredStudents = () => {
           </div>
           <button
             onClick={() => setActiveFilters(true)}
-            className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Search
           </button>
@@ -219,7 +219,7 @@ const RegisteredStudents = () => {
             >
               <div className="flex items-start justify-between mb-3">
                 <p className="text-sm text-gray-600">{stat.label}</p>
-                <Icon size={20} className="text-gray-400" />
+                <Icon size={20} className={stat.colors}/>
               </div>
               <p className="text-3xl font-semibold text-gray-900">
                 {stat.value}

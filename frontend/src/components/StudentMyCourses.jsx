@@ -168,7 +168,7 @@ const StudentMyCourses = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 px-10 py-6 text-gray-800 relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 px-10 py-6 text-gray-800 relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -179,7 +179,7 @@ const StudentMyCourses = () => {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
         >
           <FaPlus /> Add Course
         </button>
@@ -345,7 +345,7 @@ const StudentMyCourses = () => {
                 </select>
                 <button
                   onClick={handleAddCourse}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Add Course
                 </button>

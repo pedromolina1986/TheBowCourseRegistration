@@ -17,10 +17,10 @@ import {
 import { useNavigate } from "react-router-dom";
 
 const stats = [
-  { label: "Total Students", value: "156", change: "+12 this month", icon: Users },
-  { label: "Active Courses", value: "24", change: "+3 this term", icon: BarChart3 },
-  { label: "Programs", value: "3", change: "Diploma, Post-Diploma, Certificate", icon: GraduationCap },
-  { label: "Pending Forms", value: "8", change: "2 urgent", icon: Mail },
+  { label: "Total Students", value: "156", change: "+12 this month", icon: Users, colors:"text-blue-300" },
+  { label: "Active Courses", value: "24", change: "+3 this term", icon: BarChart3, colors:"text-green-300" },
+  { label: "Programs", value: "3", change: "Diploma, Post-Diploma, Certificate", icon: GraduationCap,colors:"text-purple-300" },
+  { label: "Pending Forms", value: "8", change: "2 urgent", icon: Mail, colors:"text-red-300" },
 ];
 
 const enrollmentData = [
@@ -36,6 +36,7 @@ const recentActivities = [
     description: "Sarah Johnson enrolled in Diploma program",
     time: "2 hours ago",
     icon: UserPlus,
+    colors:"bg-blue-300" 
   },
   {
     type: "course",
@@ -43,6 +44,7 @@ const recentActivities = [
     description: "Advanced JavaScript course added",
     time: "5 hours ago",
     icon: Plus,
+    colors:"bg-green-300" 
   },
   {
     type: "form",
@@ -50,6 +52,7 @@ const recentActivities = [
     description: "Michael Chen submitted course inquiry",
     time: "1 day ago",
     icon: Mail,
+    colors:"bg-red-300" 
   },
   {
     type: "update",
@@ -57,6 +60,7 @@ const recentActivities = [
     description: "Database Design course schedule modified",
     time: "2 days ago",
     icon: Edit,
+    colors:"bg-purple-300" 
   },
 ];
 
@@ -97,32 +101,32 @@ const DashboardAdmin = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
       {/* User Info Card */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <User size={32} className="text-gray-600" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-semibold text-white">
                 John Smith
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white">
                 Administrator • SD Department
               </p>
               <div className="flex items-center gap-1 mt-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-white">
                   Admin Status: Active
                 </span>
               </div>
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-sm text-gray-600">Last Login</p>
-            <p className="text-base font-medium text-gray-900">Today, 9:15 AM</p>
+            <p className="text-sm text-white">Last Login</p>
+            <p className="text-base font-medium text-white">Today, 9:15 AM</p>
           </div>
         </div>
       </div>
@@ -134,16 +138,16 @@ const DashboardAdmin = () => {
           return (
             <div
               key={idx}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex flex-col justify-between"
+              className={`bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex flex-col justify-between`}
             >
               <div className="flex items-start justify-between mb-3">
                 <p className="text-sm text-gray-600">{stat.label}</p>
-                <Icon size={20} className="text-gray-400" />
+                <Icon size={20} className={`${stat.colors}`} />
               </div>
               <p className="text-3xl font-semibold text-gray-900 mb-1">
                 {stat.value}
               </p>
-              <p className="text-xs text-gray-500">{stat.change}</p>
+              <p className="text-xs text-gray-600">{stat.change}</p>
             </div>
           );
         })}
@@ -153,7 +157,7 @@ const DashboardAdmin = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Program Enrollment */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+          <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Program Enrollment
             </h3>
@@ -190,7 +194,7 @@ const DashboardAdmin = () => {
 
         {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+          <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Recent Activity
             </h3>
@@ -210,8 +214,8 @@ const DashboardAdmin = () => {
                       : ""
                   }`}
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon size={16} className="text-gray-600" />
+                  <div className={`${activity.colors} w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <Icon size={16} className="text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 mb-0.5">
@@ -233,7 +237,7 @@ const DashboardAdmin = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-5 border-b border-gray-200">
+          <div className="bg-white rounded-t-lg p-5 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
               Quick Actions
             </h3>
@@ -244,7 +248,7 @@ const DashboardAdmin = () => {
               return (
                 <button
                   key={idx}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors mb-1"
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-blue-100 rounded-lg transition-colors mb-1"
                   onClick={() => navigate(action.path)}
                 >
                   <div className="flex items-center gap-3">
@@ -262,7 +266,7 @@ const DashboardAdmin = () => {
 
         {/* Recent Student Questions */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-5 border-b border-gray-200 flex items-center justify-between">
+          <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
               Recent Student Questions
             </h3>

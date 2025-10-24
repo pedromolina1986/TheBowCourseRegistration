@@ -79,11 +79,11 @@ const StudentTermSelection = () => {
       </div>
 
       {/* Current Program Info */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl shadow mb-6 sm:mb-8">
-        <h2 className="text-base sm:text-lg font-semibold mb-3">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 sm:p-6 rounded-2xl shadow mb-6 sm:mb-8">
+        <h2 className="text-white text-base sm:text-lg font-semibold mb-3">
           Current Program Information
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 text-sm gap-y-2 sm:gap-y-3">
+        <div className="text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 text-sm gap-y-2 sm:gap-y-3">
           <p>
             <strong>Program:</strong> Software Development - Diploma (2 years)
           </p>
@@ -95,7 +95,7 @@ const StudentTermSelection = () => {
           </p>
           <p>
             <strong>Enrollment Status:</strong>{" "}
-            <span className="text-green-600 font-medium">Active</span>
+            <span className="text-white font-medium">Active</span>
           </p>
         </div>
       </div>

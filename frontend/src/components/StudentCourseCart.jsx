@@ -12,6 +12,7 @@ export default function CourseRegistrationCart() {
         "Introduction to HTML, CSS, and JavaScript fundamentals for web development.",
       price: 1250,
       icon: Code,
+      color: "bg-blue-300"
     },
     {
       id: 2,
@@ -22,6 +23,7 @@ export default function CourseRegistrationCart() {
         "Learn database design principles and SQL programming for data management.",
       price: 1180,
       icon: Database,
+      color: "bg-green-300"
     },
     {
       id: 3,
@@ -32,6 +34,7 @@ export default function CourseRegistrationCart() {
         "Build native and cross-platform mobile applications using modern frameworks.",
       price: 1420,
       icon: Smartphone,
+      color: "bg-red-300"
     },
   ]);
 
@@ -47,7 +50,7 @@ export default function CourseRegistrationCart() {
   const total = subtotal + registrationFee + studentServicesFee;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100">
       <div className="p-4 sm:p-8">
         {/* Header */}
         <div className="mb-8">
@@ -73,8 +76,8 @@ export default function CourseRegistrationCart() {
                   className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col sm:flex-row justify-between gap-4"
                 >
                   <div className="flex gap-4 flex-1">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <course.icon className="w-8 h-8 text-gray-600" />
+                    <div className={`${course.color} w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <course.icon className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
                       <h4 className="text-lg font-semibold text-gray-900 mb-1">
@@ -168,7 +171,7 @@ export default function CourseRegistrationCart() {
                 </div>
               </div>
 
-              <button className="w-full bg-slate-700 text-white py-3 rounded-lg font-medium hover:bg-slate-800 transition-colors mb-3">
+              <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-300 transform hover:scale-102 mb-3">
                 Proceed to Payment
               </button>
 

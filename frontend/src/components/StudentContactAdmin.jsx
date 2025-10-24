@@ -197,9 +197,9 @@ const StudentContactAdmin = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
+              className="bg-gradient-to-r from-blue-600 to-purple-600  text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               Send Message
+            >
             </button>
             <button
               type="button"
@@ -221,7 +221,7 @@ const StudentContactAdmin = () => {
       {/* Right Section - Info + FAQs */}
       <div className="flex flex-col gap-6">
         {/* Contact Info */}
-        <div className="bg-white rounded-2xl p-4 shadow">
+        <div className="bg-gradient-to-r from-blue-600 text-white to-purple-600 rounded-2xl p-4 shadow">
           <h3 className="font-semibold mb-3">Contact Information</h3>
           <p>
             <strong>Email:</strong> admin@bow.ca

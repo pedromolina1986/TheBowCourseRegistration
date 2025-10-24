@@ -66,7 +66,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col p-4 sm:p-6 lg:p-10 text-gray-800">
+    <div className="min-h-screen flex flex-col p-4 sm:p-6 lg:p-10 text-gray-800">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h1 className="text-xl sm:text-2xl font-bold">My Profile</h1>
@@ -146,7 +146,7 @@ const ProfilePage = () => {
           <div className="mt-4 sm:mt-6 text-right">
             <button
               onClick={handleSave}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm transition"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm transition"
             >
               Save Changes
             </button>
@@ -178,9 +178,9 @@ const ProfilePage = () => {
           </section>
 
           {/* Quick Stats */}
-          <section className="bg-white p-4 sm:p-6 rounded-2xl shadow">
-            <h2 className="text-lg font-semibold mb-3">Quick Stats</h2>
-            <ul className="text-sm space-y-1">
+          <section className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 sm:p-6 rounded-2xl shadow">
+            <h2 className="text-white text-lg font-semibold mb-3">Quick Stats</h2>
+            <ul className="text-white text-sm space-y-1">
               <li>
                 Registered Courses: <strong>4</strong>
               </li>
@@ -201,20 +201,20 @@ const ProfilePage = () => {
             <h2 className="text-lg font-semibold mb-3">Account Status</h2>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" />{" "}
+                <FaCheckCircle className="text-blue-600" />{" "}
                 <span>Account Verified</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" />{" "}
+                <FaCheckCircle className="text-blue-600" />{" "}
                 <span>Email Confirmed</span>
               </li>
               <li className="flex items-center space-x-2">
-                <FaCheckCircle className="text-green-500" />{" "}
+                <FaCheckCircle className="text-blue-600" />{" "}
                 <span>Enrollment Active</span>
               </li>
               <li className="flex items-center space-x-2">
                 {isProfileComplete() ? (
-                  <FaCheckCircle className="text-green-500" />
+                  <FaCheckCircle className="text-blue-600" />
                 ) : (
                   <FaCheckCircle className="text-yellow-500" />
                 )}

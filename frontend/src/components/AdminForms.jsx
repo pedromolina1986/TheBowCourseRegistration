@@ -77,10 +77,10 @@ const formsData = [
 ];
 
 const stats = [
-  { label: "Total Forms", value: "47", icon: Mail },
-  { label: "New Forms", value: "8", icon: Inbox },
-  { label: "Urgent", value: "3", icon: AlertTriangle },
-  { label: "Pending Response", value: "12", icon: Clock },
+  { label: "Total Forms", value: "47", icon: Mail, colors:"text-green-300" },
+  { label: "New Forms", value: "8", icon: Inbox, colors:"text-blue-300" },
+  { label: "Urgent", value: "3", icon: AlertTriangle, colors:"text-red-300" },
+  { label: "Pending Response", value: "12", icon: Clock, colors:"text-yellow-300" },
 ];
 
 const SubmittedForms = () => {
@@ -182,14 +182,14 @@ const SubmittedForms = () => {
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={applyFilters}
-            className="bg-gray-900 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors"
           >
             <Filter size={18} />
             <span className="font-medium">Apply Filters</span>
           </button>
           <button
             onClick={clearFilters}
-            className="text-gray-700 px-4 py-2.5 flex items-center gap-2 hover:bg-gray-50 rounded-lg transition-colors"
+            className="text-gray-700 px-4 py-2.5 border border-gray-200 flex items-center gap-2 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <X size={18} />
             <span className="font-medium">Clear</span>
@@ -215,7 +215,7 @@ const SubmittedForms = () => {
           </div>
           <button
             onClick={applyFilters}
-            className="bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-gray-800 transition-colors"
           >
             Search
           </button>
@@ -233,7 +233,7 @@ const SubmittedForms = () => {
             >
               <div className="flex items-start justify-between mb-3">
                 <p className="text-sm text-gray-600">{stat.label}</p>
-                <Icon size={20} className="text-gray-400" />
+                <Icon size={20} className={stat.colors} />
               </div>
               <p className="text-3xl font-semibold text-gray-900">
                 {stat.value}

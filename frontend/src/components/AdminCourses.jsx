@@ -148,7 +148,7 @@ const SearchCourses = () => {
   };
 
   return (
-  <div className="p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+  <div className=" bg-gradient-to-br from-blue-100 to-purple-100 p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
     {/* Search Filters */}
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -237,7 +237,7 @@ const SearchCourses = () => {
           </button>
           <button
             onClick={() => navigate('/dashboard/courseForm')}
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-colors"
           >
             <span className="font-medium">+ Create New Course</span>
           </button>
@@ -274,7 +274,7 @@ const SearchCourses = () => {
                 className={`p-2 rounded ${
                   viewMode === 'grid'
                     ? 'bg-white shadow-sm'
-                    : 'hover:bg-gray-200'
+                    : 'hover:bg-blue-100'
                 }`}
               >
                 <Grid size={18} className="text-gray-600" />
@@ -284,7 +284,7 @@ const SearchCourses = () => {
                 className={`p-2 rounded ${
                   viewMode === 'list'
                     ? 'bg-white shadow-sm'
-                    : 'hover:bg-gray-200'
+                    : 'hover:bg-blue-100'
                 }`}
               >
                 <List size={18} className="text-gray-600" />
@@ -354,9 +354,9 @@ const SearchCourses = () => {
                       <p className="text-sm font-medium text-gray-900 mb-1">
                         {course.enrollment.current}/{course.enrollment.max}
                       </p>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-blue-100 rounded-full h-2">
                         <div
-                          className="bg-gray-900 h-2 rounded-full"
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full"
                           style={{ width: `${enrollmentPercentage}%` }}
                         ></div>
                       </div>
@@ -524,19 +524,19 @@ const SearchCourses = () => {
           Showing 1-{filteredCourses.length} of {filteredCourses.length} courses
         </p>
         <div className="flex flex-wrap justify-center sm:justify-end items-center gap-2">
-          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-blue-100 transition-colors">
             &lt;
           </button>
-          <button className="px-3 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium">
+          <button className="px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-medium">
             1
           </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-blue-100 transition-colors">
             2
           </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-blue-100 transition-colors">
             3
           </button>
-          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors">
+          <button className="px-3 py-2 border border-gray-300 rounded-lg text-sm hover:bg-blue-100 transition-colors">
             &gt;
           </button>
         </div>

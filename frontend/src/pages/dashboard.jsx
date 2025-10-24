@@ -122,7 +122,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="bg-gradient-to-br from-blue-100 to-purple-100 flex h-screen bg-gray-50">
       {/* Sidebar for desktop */}
       <div className="hidden md:flex">
         <SidebarMenu menuItems={menuItems} />
