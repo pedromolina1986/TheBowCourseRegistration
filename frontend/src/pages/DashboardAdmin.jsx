@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   BarChart3,
   User,
@@ -16,80 +17,18 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const stats = [
-  { label: "Total Students", value: "156", change: "+12 this month", icon: Users, colors:"text-blue-300" },
-  { label: "Active Courses", value: "24", change: "+3 this term", icon: BarChart3, colors:"text-green-300" },
-  { label: "Programs", value: "3", change: "Diploma, Post-Diploma, Certificate", icon: GraduationCap,colors:"text-purple-300" },
-  { label: "Pending Forms", value: "8", change: "2 urgent", icon: Mail, colors:"text-red-300" },
-];
+// --- Mock Data / API Simulation ---
 
-const enrollmentData = [
-  { program: "Software Development - Diploma", duration: "2 years • Winter Term", students: 68 },
-  { program: "Software Development - Post-Diploma", duration: "1 year • Winter Term", students: 45 },
-  { program: "Software Development - Certificate", duration: "6 months • Spring Term", students: 43 },
+// Initial/Placeholder State while loading
+const initialStats = [
+  { label: "Total Students", value: "...", change: "Loading...", icon: Users, colors: "text-blue-300" },
+  { label: "Active Courses", value: "...", change: "Loading...", icon: BarChart3, colors: "text-green-300" },
+  { label: "Programs", value: "...", change: "Loading...", icon: GraduationCap, colors: "text-purple-300" },
+  { label: "Pending Forms", value: "...", change: "Loading...", icon: Mail, colors: "text-red-300" },
 ];
-
-const recentActivities = [
-  {
-    type: "registration",
-    title: "New student registration",
-    description: "Sarah Johnson enrolled in Diploma program",
-    time: "2 hours ago",
-    icon: UserPlus,
-    colors:"bg-blue-300" 
-  },
-  {
-    type: "course",
-    title: "Course created",
-    description: "Advanced JavaScript course added",
-    time: "5 hours ago",
-    icon: Plus,
-    colors:"bg-green-300" 
-  },
-  {
-    type: "form",
-    title: "Form submitted",
-    description: "Michael Chen submitted course inquiry",
-    time: "1 day ago",
-    icon: Mail,
-    colors:"bg-red-300" 
-  },
-  {
-    type: "update",
-    title: "Course updated",
-    description: "Database Design course schedule modified",
-    time: "2 days ago",
-    icon: Edit,
-    colors:"bg-purple-300" 
-  },
-];
-
-const studentQuestions = [
-  {
-    name: "Emily Rodriguez",
-    program: "Diploma Program",
-    question:
-      "Question about prerequisite courses for Advanced Database course. When will registration open?",
-    time: "3 hours ago",
-    status: "New",
-  },
-  {
-    name: "David Park",
-    program: "Post-Diploma Program",
-    question:
-      "Need clarification on course schedule conflicts between Web Development and Mobile App courses.",
-    time: "1 day ago",
-    status: "Pending",
-  },
-  {
-    name: "Lisa Chen",
-    program: "Certificate Program",
-    question:
-      "Payment deadline approaching but unable to access payment portal. Please assist.",
-    time: "2 days ago",
-    status: "Urgent",
-  },
-];
+const initialEnrollmentData = [];
+const initialRecentActivities = [];
+const initialStudentQuestions = [];
 
 const quickActions = [
   { label: "Create New Course", icon: Plus, path: "/dashboard/courseForm" },
@@ -97,11 +36,90 @@ const quickActions = [
   { label: "Review Forms", icon: Mail, path: "/dashboard/forms" },
 ];
 
+/**
+ * Simulates an API call to fetch dashboard data.
+ * In a real app, you would replace this with a 'fetch' or 'axios' call.
+ */
+const mockFetchDashboardData = async () => {
+  
+  // The actual mock data payload
+  return {
+    stats: [
+      { label: "Total Students", value: "156", change: "+12 this month", icon: Users, colors: "text-blue-300" },
+      { label: "Active Courses", value: "24", change: "+3 this term", icon: BarChart3, colors: "text-green-300" },
+      { label: "Programs", value: "3", change: "Diploma, Post-Diploma, Certificate", icon: GraduationCap, colors: "text-purple-300" },
+      { label: "Pending Forms", value: "8", change: "2 urgent", icon: Mail, colors: "text-red-300" },
+    ],
+    enrollmentData: [
+      { program: "Software Development - Diploma", duration: "2 years • Winter Term", students: 68 },
+      { program: "Software Development - Post-Diploma", duration: "1 year • Winter Term", students: 45 },
+      { program: "Software Development - Certificate", duration: "6 months • Spring Term", students: 43 },
+    ],
+    recentActivities: [
+      { type: "registration", title: "New student registration", description: "Sarah Johnson enrolled in Diploma program", time: "2 hours ago", icon: UserPlus, colors: "bg-blue-500/10 text-blue-500" },
+      { type: "course", title: "Course created", description: "Advanced JavaScript course added", time: "5 hours ago", icon: Plus, colors: "bg-green-500/10 text-green-500" },
+      { type: "form", title: "Form submitted", description: "Michael Chen submitted course inquiry", time: "1 day ago", icon: Mail, colors: "bg-red-500/10 text-red-500" },
+      { type: "update", title: "Course updated", description: "Database Design course schedule modified", time: "2 days ago", icon: Edit, colors: "bg-purple-500/10 text-purple-500" },
+    ],
+    studentQuestions: [
+      { name: "Emily Rodriguez", program: "Diploma Program", question: "Question about prerequisite courses for Advanced Database course. When will registration open?", time: "3 hours ago", status: "New" },
+      { name: "David Park", program: "Post-Diploma Program", question: "Need clarification on course schedule conflicts between Web Development and Mobile App courses.", time: "1 day ago", status: "Pending" },
+      { name: "Lisa Chen", program: "Certificate Program", question: "Payment deadline approaching but unable to access payment portal. Please assist.", time: "2 days ago", status: "Urgent" },
+    ]
+  };
+};
+
+// --- Component Definition ---
+
 const DashboardAdmin = () => {
   const navigate = useNavigate();
 
+  // 1. Define state variables
+  const [stats, setStats] = useState(initialStats);
+  const [enrollmentData, setEnrollmentData] = useState(initialEnrollmentData);
+  const [recentActivities, setRecentActivities] = useState(initialRecentActivities);
+  const [studentQuestions, setStudentQuestions] = useState(initialStudentQuestions);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 2. Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await mockFetchDashboardData();
+        setStats(data.stats);
+        setEnrollmentData(data.enrollmentData);
+        setRecentActivities(data.recentActivities);
+        setStudentQuestions(data.studentQuestions);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array means it runs once
+
+  // Helper function for status colors
+  const getStatusClasses = (status) => {
+    if (status === "New") return "bg-blue-100 text-blue-700";
+    if (status === "Urgent") return "bg-red-100 text-red-700";
+    return "bg-yellow-100 text-yellow-700";
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
+      
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="flex items-center justify-center p-4 mb-4 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg">
+          <Bell size={18} className="mr-2"/>
+          <p className="text-sm font-medium">
+            Loading dashboard data from mock server...
+          </p>
+        </div>
+      )}
+
       {/* User Info Card */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -131,7 +149,7 @@ const DashboardAdmin = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Data from 'stats' state */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
@@ -155,7 +173,8 @@ const DashboardAdmin = () => {
 
       {/* Program Enrollment + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Program Enrollment */}
+        
+        {/* Program Enrollment - Data from 'enrollmentData' state */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -166,7 +185,7 @@ const DashboardAdmin = () => {
             </button>
           </div>
           <div className="p-5">
-            {enrollmentData.map((item, idx) => (
+             {enrollmentData.length === 0 && !isLoading ? <p className="text-gray-500">No enrollment data available.</p> : enrollmentData.map((item, idx) => (
               <div
                 key={idx}
                 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${
@@ -192,7 +211,7 @@ const DashboardAdmin = () => {
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Activity - Data from 'recentActivities' state */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -203,8 +222,12 @@ const DashboardAdmin = () => {
             </button>
           </div>
           <div className="p-5">
-            {recentActivities.map((activity, idx) => {
+            {recentActivities.length === 0 && !isLoading ? <p className="text-gray-500">No recent activity.</p> : recentActivities.map((activity, idx) => {
               const Icon = activity.icon;
+              // Adjusted class for better look with Tailwind's utility classes
+              const iconBgClass = activity.colors.replace('bg-', 'bg-').replace('/30', '/10');
+              const iconTextClass = activity.colors.replace('bg-', 'text-');
+              
               return (
                 <div
                   key={idx}
@@ -214,8 +237,8 @@ const DashboardAdmin = () => {
                       : ""
                   }`}
                 >
-                  <div className={`${activity.colors} w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <Icon size={16} className="text-white" />
+                  <div className={`${iconBgClass} w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <Icon size={16} className={`${iconTextClass.replace('bg-', 'text-')}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 mb-0.5">
@@ -235,7 +258,8 @@ const DashboardAdmin = () => {
 
       {/* Quick Actions + Student Questions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
+        
+        {/* Quick Actions (Static Data) */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="bg-white rounded-t-lg p-5 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -264,7 +288,7 @@ const DashboardAdmin = () => {
           </div>
         </div>
 
-        {/* Recent Student Questions */}
+        {/* Recent Student Questions - Data from 'studentQuestions' state */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="bg-white rounded-t-lg p-5 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900">
@@ -275,7 +299,7 @@ const DashboardAdmin = () => {
             </button>
           </div>
           <div className="p-5">
-            {studentQuestions.map((q, idx) => (
+            {studentQuestions.length === 0 && !isLoading ? <p className="text-gray-500">No student questions.</p> : studentQuestions.map((q, idx) => (
               <div
                 key={idx}
                 className={`${
@@ -295,13 +319,7 @@ const DashboardAdmin = () => {
                     </div>
                   </div>
                   <span
-                    className={`px-2.5 py-1 rounded text-xs font-medium self-start sm:self-auto ${
-                      q.status === "New"
-                        ? "bg-blue-100 text-blue-700"
-                        : q.status === "Urgent"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
+                    className={`px-2.5 py-1 rounded text-xs font-medium self-start sm:self-auto ${getStatusClasses(q.status)}`}
                   >
                     {q.status}
                   </span>
