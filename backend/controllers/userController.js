@@ -1,141 +1,244 @@
 /*
-Controller for User CRUD Operations
-This file handles the CRUD operations for users using SQL queries.
+Controller for User CRUD + Auth (SQL Server, parameterized)
+Schema: Users(user_id INT PK, user_name, user_password, user_type)
+DB: TheBowCourse
 */
+import sql from "mssql";
+import { config } from "../config/dbConfig.js";
 
-import sql from 'mssql';
-import { config } from '../config/dbConfig.js';
+async function getPool() {
+  if (sql.connected) return sql;
+  return sql.connect(config);
+}
 
-// Connect to SQL Server
-const connectToSQL = async () => {
+/* ========= AUTH ========= */
+
+// POST /api/v1/users/register
+export async function registerUser(req, res) {
   try {
-    await sql.connect(config);
-    
-    sql.on('error', err => {
-      console.error('SQL Error: ', err);
-    });
-
-  } catch (err) {
-    console.error('Error connecting to SQL Server: ', err);  // Log the full error details
-    throw new Error('Error connecting to SQL Server:', err);
-  }
-};
-
-// Get all users
-export const getUsers = async (req, res) => {
-  try {
-    await connectToSQL();
-    const result = await sql.query('SELECT * FROM Users');
-    console.log('SQL Query Result:', result);
-    res.json(result.recordset); // Return the result set
-  } catch (err) {
-    console.error('Error retrieving users:', err);
-    res.status(500).json({ error: 'Failed to retrieve users' });
-  }
-};
-
-// Create a new user
-export const createUser = async (req, res) => {
-  // console.log('Request Body:', req.body);
-  const { user_name, user_password, user_type } = req.body;
-
-  // Convert age to a number
-  const ageNumber = Number(age);
-
-  // Basic validation
-  if (!user_name || typeof user_name !== 'string') {
-    return res.status(400).json({ error: 'Invalid or missing name' });
-  }
-  if (!user_pasasword || typeof user_password !== 'string') {
-    return res.status(400).json({ error: 'Invalid or missing password' });
-  }
-  if (!user_type || typeof user_type !== 'string') {
-    return res.status(400).json({ error: 'Invalid or missing type' });
-  }
-  
-
-  try {
-    await connectToSQL();
-    await sql.query(`INSERT INTO Users (user_name, user_password, user_type) VALUES ('${user_name}', ${user_password}, '${user_type}')`);
-    res.status(201).json({ message: 'User created successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to create user' });
-  }
-};
-
-// Update a user
-export const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { user_name, user_pasasword, user_type } = req.body;
-
-  try {
-    await connectToSQL();
-    const result = await sql.query(`UPDATE Users SET user_name = '${user_name}', user_password = ${user_pasasword}, user_type = ${user_type} WHERE id = ${id}`);
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.json({ message: 'User updated successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to update user' });
-  }
-};
-
-// Patch (Partial Update) a user
-export const patchUser = async (req, res) => {
-  const { id } = req.params;
-  const { user_name, user_pasasword, user_type } = req.body;
-
-  try {
-    await connectToSQL();
-
-    // First, retrieve the current user data to keep unchanged fields
-    const currentUserResult = await sql.query(`SELECT * FROM Users WHERE id = ${id}`);
-    const currentUser = currentUserResult.recordset[0];
-
-    if (!currentUser) {
-      return res.status(404).json({ error: 'User not found' });
+    const { user_name, user_password, user_type } = req.body || {};
+    if (!user_name || !user_password || !user_type) {
+      return res.status(400).json({ error: "user_name, user_password, user_type are required" });
     }
 
-    // If no name is provided, use the existing name from the current user
-    const updatedName = user_name !== undefined ? user_name : currentUser.user_name;
+    const pool = await getPool();
+    const result = await pool.request()
+      .input("user_name", sql.NVarChar, user_name)
+      .input("user_password", sql.NVarChar, user_password)
+      .input("user_type", sql.NVarChar, user_type)
+      .query(`
+        INSERT INTO Users (user_name, user_password, user_type)
+        OUTPUT INSERTED.user_id       AS id,
+               INSERTED.user_name     AS user_name,
+               INSERTED.user_password AS user_password,
+               INSERTED.user_type     AS user_type
+        VALUES (@user_name, @user_password, @user_type)
+      `);
 
-    // If no name is provided, use the existing name from the current user
-    const updatedPassword = user_password !== undefined ? user_password : currentUser.user_password;
-
-    // If no name is provided, use the existing name from the current user
-    const updatedType = user_type !== undefined ? user_type : currentUser.user_type;
-
-    
-    // Perform the update with the provided or existing values
-    const result = await sql.query(
-      `UPDATE Users SET user_name = '${updatedName}', user_password = ${updatedAge}, user_type = ${updatedType} WHERE id = ${id}`
-    );
-
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.json({ message: 'User patched successfully' });
+    return res.status(201).json(result.recordset[0]);
   } catch (err) {
-    console.error('Error patching user:', err);
-    res.status(500).json({ error: 'Failed to patch user' });
+    console.error("registerUser:", err);
+    return res.status(500).json({ error: "Failed to register user" });
   }
-};
+}
 
-
-
-// Delete a user
-export const deleteUser = async (req, res) => {
-  const { id } = req.params;
-
+// POST /api/v1/users/login
+export async function loginUser(req, res) {
   try {
-    await connectToSQL();
-    const result = await sql.query(`DELETE FROM Users WHERE id = ${id}`);
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ error: 'User not found' });
+    const { user_name, user_password } = req.body || {};
+    if (!user_name || !user_password) {
+      return res.status(400).json({ error: "user_name and user_password are required" });
     }
-    res.status(200).json({ message: 'User deleted successfully' });
+
+    const pool = await getPool();
+    const result = await pool.request()
+      .input("user_name", sql.NVarChar, user_name)
+      .input("user_password", sql.NVarChar, user_password)
+      .query(`
+        SELECT TOP 1
+          user_id AS id,
+          user_name,
+          user_password,
+          user_type
+        FROM Users
+        WHERE user_name = @user_name AND user_password = @user_password
+      `);
+
+    const user = result.recordset[0];
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+    return res.json({ user });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete user' });
+    console.error("loginUser:", err);
+    return res.status(500).json({ error: "Login failed" });
   }
-};
+}
+
+/* ========= CRUD ========= */
+
+// GET /api/v1/users
+export async function getUsers(req, res) {
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT user_id AS id, user_name, user_password, user_type
+      FROM Users
+      ORDER BY user_id DESC
+    `);
+    return res.json(result.recordset);
+  } catch (err) {
+    console.error("getUsers:", err);
+    return res.status(500).json({ error: "Failed to retrieve users" });
+  }
+}
+
+// GET /api/v1/users/:id
+export async function getUserById(req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+    const pool = await getPool();
+    const result = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT user_id AS id, user_name, user_password, user_type
+        FROM Users
+        WHERE user_id = @id
+      `);
+
+    const row = result.recordset[0];
+    if (!row) return res.status(404).json({ error: "User not found" });
+    return res.json(row);
+  } catch (err) {
+    console.error("getUserById:", err);
+    return res.status(500).json({ error: "Failed to retrieve user" });
+  }
+}
+
+// POST /api/v1/users
+export async function createUser(req, res) {
+  try {
+    const { user_name, user_password, user_type } = req.body || {};
+    if (!user_name || !user_password || !user_type) {
+      return res.status(400).json({ error: "user_name, user_password, user_type are required" });
+    }
+
+    const pool = await getPool();
+    const result = await pool.request()
+      .input("user_name", sql.NVarChar, user_name)
+      .input("user_password", sql.NVarChar, user_password)
+      .input("user_type", sql.NVarChar, user_type)
+      .query(`
+        INSERT INTO Users (user_name, user_password, user_type)
+        OUTPUT INSERTED.user_id       AS id,
+               INSERTED.user_name     AS user_name,
+               INSERTED.user_password AS user_password,
+               INSERTED.user_type     AS user_type
+        VALUES (@user_name, @user_password, @user_type)
+      `);
+
+    return res.status(201).json(result.recordset[0]);
+  } catch (err) {
+    console.error("createUser:", err);
+    return res.status(500).json({ error: "Failed to create user" });
+  }
+}
+
+// PUT /api/v1/users/:id
+export async function updateUser(req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+    const { user_name, user_password, user_type } = req.body || {};
+    if (!user_name || !user_password || !user_type) {
+      return res.status(400).json({ error: "All fields required for PUT" });
+    }
+
+    const pool = await getPool();
+    const upd = await pool.request()
+      .input("id", sql.Int, id)
+      .input("user_name", sql.NVarChar, user_name)
+      .input("user_password", sql.NVarChar, user_password)
+      .input("user_type", sql.NVarChar, user_type)
+      .query(`
+        UPDATE Users SET
+          user_name = @user_name,
+          user_password = @user_password,
+          user_type = @user_type
+        WHERE user_id = @id;
+
+        SELECT @@ROWCOUNT AS affected;
+      `);
+
+    if (!upd.recordset[0]?.affected) return res.status(404).json({ error: "User not found" });
+    return res.json({ message: "User updated" });
+  } catch (err) {
+    console.error("updateUser:", err);
+    return res.status(500).json({ error: "Failed to update user" });
+  }
+}
+
+// PATCH /api/v1/users/:id
+export async function patchUser(req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+    const { user_name, user_password, user_type } = req.body || {};
+    const pool = await getPool();
+
+    const cur = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`SELECT * FROM Users WHERE user_id = @id`);
+    const row = cur.recordset[0];
+    if (!row) return res.status(404).json({ error: "User not found" });
+
+    const newName = user_name ?? row.user_name;
+    const newPass = user_password ?? row.user_password;
+    const newType = user_type ?? row.user_type;
+
+    const upd = await pool.request()
+      .input("id", sql.Int, id)
+      .input("user_name", sql.NVarChar, newName)
+      .input("user_password", sql.NVarChar, newPass)
+      .input("user_type", sql.NVarChar, newType)
+      .query(`
+        UPDATE Users SET
+          user_name = @user_name,
+          user_password = @user_password,
+          user_type = @user_type
+        WHERE user_id = @id;
+
+        SELECT @@ROWCOUNT AS affected;
+      `);
+
+    if (!upd.recordset[0]?.affected) return res.status(404).json({ error: "User not found" });
+    return res.json({ message: "User patched" });
+  } catch (err) {
+    console.error("patchUser:", err);
+    return res.status(500).json({ error: "Failed to patch user" });
+  }
+}
+
+// DELETE /api/v1/users/:id
+export async function deleteUser(req, res) {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+    const pool = await getPool();
+    const del = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        DELETE FROM Users WHERE user_id = @id;
+        SELECT @@ROWCOUNT AS affected;
+      `);
+
+    if (!del.recordset[0]?.affected) return res.status(404).json({ error: "User not found" });
+    return res.json({ message: "User deleted" });
+  } catch (err) {
+    console.error("deleteUser:", err);
+    return res.status(500).json({ error: "Failed to delete user" });
+  }
+}

@@ -3,47 +3,60 @@ Main Application
 This file starts the server, connects the routes, and serves the public HTML files.
 */
 
-import express from 'express';
-import dotenv from 'dotenv';
-import userRoutes from './routes/userRoutes.js';
-import courseRoutes from './routes/courseRoutes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+/*
+Main Application
+This file starts the server and mounts the routes under /api/v1
+*/
 
-// Load .env file
+import express from "express";
+import dotenv from "dotenv";
+
+// routes
+import userRoutes from "./routes/userRoutes.js";
+import courseRoutes from "./routes/courseRoutes.js";
+import registrationRoutes from "./routes/registrationRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+// Load .env
 dotenv.config();
 
-// Setup for __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url); // Converts the URL of the current module (import.meta.url) into a file path.
-const __dirname = dirname(__filename); // Extracts the directory path of the current file.
+// __dirname setup for ESM 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
-app.use(express.json()); // Middleware for JSON parsing
-app.use(express.urlencoded({ extended: true })); // Middleware for form data (URL-encoded)
 
+// Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Serve static HTML files from the "public" folder (any file inside the public folder can be accessed by the browser directly)
-app.use(express.static('public'));
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "Bow Course Registration API", version: "v1" });
+});
 
-// Use the user and order routes
-app.use('/api/v1', userRoutes);
-app.use('/api/v1', courseRoutes); 
+// Mount routes 
+app.use("/api/v1", userRoutes);
+app.use("/api/v1", courseRoutes);
+app.use("/api/v1", registrationRoutes);
+app.use("/api/v1", messageRoutes);
 
+// 404 for unknown routes
+app.use((req, res) => {
+  res.status(404).json({ error: "Not Found" });
+});
 
-// Start the server
+// centralized error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+// Start server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-/*
-- process.env.PORT: This accesses an environment variable called PORT using process.env. 
-Environment variables are variables that come from the system (your computer or the server where your app is running), and they allow configuration without hard-coding values into the application.
-
-By using process.env.PORT, the code allows the app to run on different environments (production environment or development environment)
-*/
-
-/*
-Middleware refers to functions that execute during the request-response cycle. Middleware functions have access to the request (req) and response (res) objects, as well as the next middleware function in the application's cycle.
-*/
