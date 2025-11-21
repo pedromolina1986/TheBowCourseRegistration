@@ -10,6 +10,7 @@ This file starts the server and mounts the routes under /api/v1
 
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors"; 
 
 // routes
 import userRoutes from "./routes/userRoutes.js";
@@ -33,6 +34,17 @@ const app = express();
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (req, res) => {
+  res.json({ ok: true, service: "Bow Course Registration API", version: "v1" });
+});
+
+// Enable CORS for React frontend
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 app.get("/", (req, res) => {
   res.json({ ok: true, service: "Bow Course Registration API", version: "v1" });

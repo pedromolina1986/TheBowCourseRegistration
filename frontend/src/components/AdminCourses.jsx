@@ -148,7 +148,7 @@ const SearchCourses = () => {
   };
 
   return (
-  <div className=" bg-gradient-to-br from-blue-100 to-purple-100 p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+  <div className=" bg-gradient-to-br from-blue-100 to-purple-100 p-4 sm:p-6 md:p-8 min-h-screen">
     {/* Search Filters */}
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -296,7 +296,7 @@ const SearchCourses = () => {
 
       {/* Table Header (hidden on mobile) */}
       {viewMode === 'list' && (
-        <div className="hidden md:block px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div className="hidden md:block px-6 py-4 bg-gradient-to-br from-blue-100 to-purple-100 bg-gray-50 border-b border-gray-200">
           <div className="grid grid-cols-12 gap-4 text-xs font-medium text-gray-500 uppercase">
             <div className="col-span-3">Course Details</div>
             <div className="col-span-2">Program</div>

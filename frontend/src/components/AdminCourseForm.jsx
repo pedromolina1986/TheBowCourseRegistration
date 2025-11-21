@@ -232,7 +232,7 @@ const EditCourse = () => {
   };
 
   return (
-    <div className="p-4 sm:p-8 bg-gray-50 min-h-screen">
+    <div className="p-4 sm:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sidebar - Available Courses */}
         <div className="col-span-1">
@@ -291,7 +291,7 @@ const EditCourse = () => {
                   onClick={() => handleCourseSelect(course.code)}
                   className={`w-full text-left p-3 rounded-lg mb-1 transition-colors ${
                     selectedCourseCode === course.code && !isNewCourse
-                      ? "bg-gray-900 text-white"
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                       : "hover:bg-gray-50"
                   }`}
                 >
@@ -307,7 +307,7 @@ const EditCourse = () => {
                   <p
                     className={`text-xs mt-0.5 ${
                       selectedCourseCode === course.code && !isNewCourse
-                        ? "text-gray-300"
+                        ? "text-white"
                         : "text-gray-600"
                     }`}
                   >
@@ -316,7 +316,7 @@ const EditCourse = () => {
                   <p
                     className={`text-xs mt-0.5 ${
                       selectedCourseCode === course.code && !isNewCourse
-                        ? "text-gray-400"
+                        ? "text-white"
                         : "text-gray-500"
                     }`}
                   >
@@ -360,7 +360,7 @@ const EditCourse = () => {
                 )}
                 <button
                   onClick={handleSave}
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors"
                 >
                   <Save size={16} />
                   {isNewCourse ? "Create Course" : "Save Changes"}

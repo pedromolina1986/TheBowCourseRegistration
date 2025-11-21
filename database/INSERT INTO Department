@@ -1,0 +1,2 @@
+INSERT INTO Department (department_name, office_location)
+VALUES ('Software Development', 'Main Building - Room 201');

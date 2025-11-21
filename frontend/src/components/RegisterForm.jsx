@@ -13,10 +13,18 @@ const RegisterForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [yearLevel, setYearLevel] = useState(2);
 
-  const handleSubmit = (e) => {
+  const programYearMap = {
+    "diploma": 2,
+    "post-diploma": 1,
+    "certificate": 0.5
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
     if (!username || !password) {
       alert("Please enter a username and password.");
       return;
@@ -27,35 +35,64 @@ const RegisterForm = () => {
       return;
     }
 
-    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+      const response = await fetch("http://localhost:5000/api/v1/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_name: username,
+          user_password: password,
+          user_type: "student",
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          email: email.trim(),
+          phone_number: phone,
+          program,
+          department_id: 1,
+          year_level: yearLevel,
+          assigned_by: 1
+        })
+      });
 
-    const userExists = existingUsers.some(user => user.username === username);
-    if (userExists) {
-      alert("Username already exists. Please choose another.");
-      return;
+      // Check if server responded
+      if (!response) {
+        alert("❌ No response from server. Is it running on port 5000?");
+        return;
+      }
+
+      // Try parsing JSON
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error("JSON parse error:", jsonError);
+        alert("❌ Server returned invalid JSON. Check backend.");
+        return;
+      }
+
+      // Handle server error messages
+      if (!response.ok) {
+        console.error("Server error response:", result);
+        alert(`❌ Registration failed: ${result.error || JSON.stringify(result)}`);
+        return;
+      }
+
+      alert("🎉 Account created successfully!");
+      window.location.href = "/login";
+
+    } catch (error) {
+      console.error("Fetch/network error:", error);
+      if (error instanceof TypeError) {
+        alert("❌ Cannot connect to server. Check if server is running and CORS settings.");
+      } else {
+        alert(`❌ Unexpected error: ${error.message}`);
+      }
     }
-
-    const newUser = {
-      firstName,
-      lastName,
-      email,
-      phone,
-      dob,
-      department,
-      program,
-      username,
-      password,
-      userType: 'student',
-    };
-
-
-    existingUsers.push(newUser);
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-
-
-    alert("✅ Account created successfully!");
-    window.location.href = '/login';
   };
+
+
 
   const onBackToLogin = () => {
     window.location.href = '/login';
@@ -161,7 +198,10 @@ const RegisterForm = () => {
               </label>
               <select
                 value={program}
-                onChange={(e) => setProgram(e.target.value)}
+                onChange={(e) => {
+                  setProgram(e.target.value);
+                  setYearLevel(programYearMap[e.target.value] || 0);
+                }}
                 className="w-full border border-neutral-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent"
               >
                 <option value="">Select Program</option>

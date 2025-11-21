@@ -39,14 +39,16 @@ CREATE TABLE Department (
 );
 
 -- Admin table
-CREATE TABLE Admin (
+CREATE TABLE dbo.Admin (
     admin_id INT IDENTITY(1,1) PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    email VARCHAR(100),
+    user_id INT NOT NULL UNIQUE,         -- link to Users table
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
     phone_number VARCHAR(15),
-    department_id INT,
-    FOREIGN KEY (department_id) REFERENCES Department(department_id)
+    department_id INT NOT NULL,
+    CONSTRAINT FK_Admin_User FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id),
+    CONSTRAINT FK_Admin_Department FOREIGN KEY (department_id) REFERENCES dbo.Department(department_id)
 );
 
 -- Instructor table
@@ -62,12 +64,14 @@ CREATE TABLE Instructor (
 -- Student table
 CREATE TABLE Student (
     student_id INT IDENTITY(1,1) PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
-    email VARCHAR(100),
+    user_id INT NOT NULL,                   -- link to Users table
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
     program VARCHAR(100),
     year_level INT,
-    assigned_by INT,
+    assigned_by INT,                        -- optional: which admin assigned the student
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (assigned_by) REFERENCES Admin(admin_id)
 );
 
