@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Code, Globe, Database, TestTube, Search, ChevronDown } from 'lucide-react';
 import CourseCard from './CourseCard';
+import api from '../services/api';
 
 const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('All Terms');
 
+  console.log("HERE")
+  const coursesData = api.get("/courses"); // Fetch courses from the API
+  console.log("COURSES", coursesData);
 
   const courses = [
     {

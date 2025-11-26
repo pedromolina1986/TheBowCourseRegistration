@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Search, RotateCcw, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api.js";
 
+const coursesData = await api.get("/courses");
+console.log("COURSES DATA", coursesData);
 const initialCoursesData = [
   {
     id: 1,

@@ -20,7 +20,7 @@ export async function getCourses(req, res) {
     const { q = "", term, program } = req.query || {};
     const pool = await getPool();
 
-    let query = `SELECT * FROM Courses WHERE 1=1`;
+    let query = `SELECT * FROM Course WHERE 1=1`;
     const r = pool.request();
 
     if (q) {
@@ -35,7 +35,7 @@ export async function getCourses(req, res) {
       query += ` AND program = @program`;
       r.input("program", sql.NVarChar, program);
     }
-    query += ` ORDER BY id DESC`;
+    query += ` ORDER BY course_id DESC`;
 
     const result = await r.query(query);
     return res.json(result.recordset);
