@@ -1,58 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Code, Globe, Database, TestTube, Search, ChevronDown } from 'lucide-react';
 import CourseCard from './CourseCard';
 import WhiteButton from './WhiteButton';
+import api from '../services/api';
 
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTerm, setSelectedTerm] = useState('All Terms');
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    async function loadCourses() {
+      try {
+        const res = await api.get('/courses'); 
+        const mapped = res.data.map((c) => {
+          const startDate = c.start_date ? new Date(c.start_date).toLocaleDateString() : '';
+          const endDate = c.end_date ? new Date(c.end_date).toLocaleDateString() : '';
+
+          return {
+            code: c.course_code,
+            title: c.course_name,
+            term: c.term_name || 'Unknown', 
+            description: c.description,
+            credits: c.credit_hours,
+            maxEnrollment: c.capacity,
+            instructor: c.instructor_id,
+            startDate,
+            endDate,
+            icon: Code, 
+          };
+        });
+        setCourses(mapped);
+      } catch (err) {
+        console.error('Failed to load courses:', err);
+      }
+    }
+
+    loadCourses();
+  }, []);
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch =
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.code.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesTerm =
+      selectedTerm === "All Terms" || course.term === selectedTerm;
+
+    return matchesSearch && matchesTerm;
+  });
 
   const loadMoreClick = () => {
-    window.location.href = '#/courses'
-  }
-
-  const courses = [
-    {
-      code: 'SDEV101',
-      title: 'Programming Fundamentals',
-      term: 'Winter 2025',
-      description: 'Introduction to programming concepts using modern programming languages. Covers variables, control structures, functions, and basic algorithms.',
-      startDate: 'Jan 15, 2025',
-      endDate: 'Mar 30, 2025',
-      credits: '3',
-      icon: Code
-    },
-    {
-      code: 'SDEV102',
-      title: 'Web Development',
-      term: 'Winter 2025',
-      description: 'Comprehensive introduction to web development including HTML, CSS, JavaScript, and modern web frameworks for building responsive websites.',
-      startDate: 'Jan 15, 2025',
-      endDate: 'Mar 30, 2025',
-      credits: '4',
-      icon: Globe
-    },
-    {
-      code: 'SDEV103',
-      title: 'Database Design',
-      term: 'Winter 2025',
-      description: 'Learn database design principles, SQL programming, and database management systems for effective data storage and retrieval.',
-      startDate: 'Jan 15, 2025',
-      endDate: 'Mar 30, 2025',
-      credits: '3',
-      icon: Database
-    },
-    {
-      code: 'SDEV104',
-      title: 'Software Testing',
-      term: 'Winter 2025',
-      description: 'Comprehensive overview of software testing methodologies including unit testing, integration testing, and automated testing frameworks.',
-      startDate: 'Jan 15, 2025',
-      endDate: 'Mar 30, 2025',
-      credits: '3',
-      icon: TestTube
-    }
-  ];
+    window.location.href = '#/courses';
+  };
 
   return (
     <section className="bg-white py-16">
@@ -80,22 +80,24 @@ const Courses = () => {
                 onChange={(e) => setSelectedTerm(e.target.value)}
               >
                 <option>All Terms</option>
-                <option>Winter 2025</option>
-                <option>Spring 2025</option>
-                <option>Summer 2025</option>
-                <option>Fall 2025</option>
+                {/* dynamically populate unique terms */}
+                {Array.from(new Set(courses.map(c => c.term))).map((term, idx) => (
+                  <option key={idx}>{term}</option>
+                ))}
               </select>
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             </div>
           </div>
         </div>
+
         <div className="grid md:grid-cols-2 gap-6 mb-8">
-          {courses.map((course, i) => (
+          {filteredCourses.slice(0, 4).map((course, i) => (
             <CourseCard key={i} {...course} />
           ))}
         </div>
+
         <div className="text-center">
-          <WhiteButton OnclickHandler={loadMoreClick} label={"Load More Courses"}/>
+          <WhiteButton OnclickHandler={loadMoreClick} label="Load More Courses" />
         </div>
       </div>
     </section>

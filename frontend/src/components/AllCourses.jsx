@@ -11,8 +11,25 @@ const AllCourses = () => {
   useEffect(() => {
     async function loadCourses() {
       try {
-        const res = await api.get("/courses"); // ← Calls your real controller
-        setCourses(res.data);
+        const res = await api.get("/courses");
+        const mapped = res.data.map((c) => {
+          const startDate = c.start_date ? new Date(c.start_date).toLocaleDateString() : "";
+          const endDate = c.end_date ? new Date(c.end_date).toLocaleDateString() : "";
+          
+          return{
+            code: c.course_code,
+            title: c.course_name,
+            term: c.term_name,     
+            description: c.description,
+            credits: c.credit_hours,
+            maxEnrollment: c.capacity,
+            instructor: c.instructor_id,
+            startDate: startDate || '',
+            endDate: endDate || '',
+            icon: Code   
+        };
+      });
+        setCourses(mapped);
       } catch (err) {
         console.error("Failed to load courses:", err);
       }
@@ -24,61 +41,14 @@ const AllCourses = () => {
   // Apply search + filter
   const filteredCourses = courses.filter(course => {
     const matchesSearch =
-      course.course_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.course_code.toLowerCase().includes(searchTerm.toLowerCase());
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.code.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesTerm =
-      selectedTerm === "All Terms" || course.term_name === selectedTerm;
+      selectedTerm === "All Terms" || course.term === selectedTerm;
 
     return matchesSearch && matchesTerm;
   });
-
-  // console.log("HERE")
-  // const coursesData = api.get("/courses"); // Fetch courses from the API
-  // console.log("COURSES", coursesData);
-
-  // const courses = [
-  //   {
-  //     code: 'SDEV101',
-  //     title: 'Programming Fundamentals',
-  //     term: 'Winter 2025',
-  //     description: 'Introduction to programming concepts using modern programming languages. Covers variables, control structures, functions, and basic algorithms.',
-  //     startDate: 'Jan 15, 2025',
-  //     endDate: 'Mar 30, 2025',
-  //     credits: '3',
-  //     icon: Code
-  //   },
-  //   {
-  //     code: 'SDEV102',
-  //     title: 'Web Development',
-  //     term: 'Winter 2025',
-  //     description: 'Comprehensive introduction to web development including HTML, CSS, JavaScript, and modern web frameworks for building responsive websites.',
-  //     startDate: 'Jan 15, 2025',
-  //     endDate: 'Mar 30, 2025',
-  //     credits: '4',
-  //     icon: Globe
-  //   },
-  //   {
-  //     code: 'SDEV103',
-  //     title: 'Database Design',
-  //     term: 'Winter 2025',
-  //     description: 'Learn database design principles, SQL programming, and database management systems for effective data storage and retrieval.',
-  //     startDate: 'Jan 15, 2025',
-  //     endDate: 'Mar 30, 2025',
-  //     credits: '3',
-  //     icon: Database
-  //   },
-  //   {
-  //     code: 'SDEV104',
-  //     title: 'Software Testing',
-  //     term: 'Winter 2025',
-  //     description: 'Comprehensive overview of software testing methodologies including unit testing, integration testing, and automated testing frameworks.',
-  //     startDate: 'Jan 15, 2025',
-  //     endDate: 'Mar 30, 2025',
-  //     credits: '3',
-  //     icon: TestTube
-  //   }
-  // ];
 
   return (
     <section className="bg-white py-16 rounded-lg border border-neutral-200 mx-auto my-8 p-8 max-w-7xl">
@@ -86,7 +56,7 @@ const AllCourses = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Available Courses</h2>
           <p className="text-gray-600 mb-6">
-            Explore our comprehensive course catalog for the Software Development department.
+            Explore our comprehensive course catalog.
           </p>
           <div className="flex gap-4">
             <div className="flex-1 relative">

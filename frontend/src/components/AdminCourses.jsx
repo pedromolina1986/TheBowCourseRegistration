@@ -3,71 +3,6 @@ import { Search, RotateCcw, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api.js";
 
-// const coursesData = await api.get("/courses");
-// console.log("COURSES DATA", coursesData);
-// const initialCoursesData = [
-//   {
-//     id: 1,
-//     code: "SDEV-101",
-//     name: "Introduction to Programming",
-//     credits: 3,
-//     program: "Diploma",
-//     term: "Winter 2025",
-//     dates: "Jan 15 - Mar 30",
-//     enrollment: { current: 22, max: 25 },
-//     instructor: "Dr. Smith",
-//     status: "Active",
-//   },
-//   {
-//     id: 2,
-//     code: "SDEV-201",
-//     name: "Advanced JavaScript Development",
-//     credits: 4,
-//     program: "Post-Diploma",
-//     term: "Spring 2025",
-//     dates: "Mar 15 - Jun 15",
-//     enrollment: { current: 18, max: 20 },
-//     instructor: "Prof. Johnson",
-//     status: "Active",
-//   },
-//   {
-//     id: 3,
-//     code: "SDEV-150",
-//     name: "Database Fundamentals",
-//     credits: 3,
-//     program: "Certificate",
-//     term: "Summer 2025",
-//     dates: "Jun 1 - Aug 30",
-//     enrollment: { current: 0, max: 15 },
-//     instructor: "TBA",
-//     status: "Draft",
-//   },
-//   {
-//     id: 4,
-//     code: "SDEV-301",
-//     name: "Full Stack Web Development",
-//     credits: 5,
-//     program: "Diploma",
-//     term: "Fall 2025",
-//     dates: "Sep 5 - Dec 15",
-//     enrollment: { current: 15, max: 30 },
-//     instructor: "Dr. Williams",
-//     status: "Active",
-//   },
-//   {
-//     id: 5,
-//     code: "SDEV-250",
-//     name: "Mobile App Development",
-//     credits: 4,
-//     program: "Post-Diploma",
-//     term: "Winter 2025",
-//     dates: "Jan 10 - Apr 5",
-//     enrollment: { current: 12, max: 18 },
-//     instructor: "Prof. Davis",
-//     status: "Active",
-//   },
-// ];
-
 const SearchCourses = () => {
   const navigate = useNavigate();
 
@@ -107,18 +42,24 @@ const SearchCourses = () => {
     try {
       const res = await api.get("/courses");
 
-      const mappedCourses = res.data.map((c) => ({
+      const mappedCourses = res.data.map((c) => {
+      const startDate = c.start_date ? new Date(c.start_date).toLocaleDateString() : "";
+      const endDate = c.end_date ? new Date(c.end_date).toLocaleDateString() : "";
+
+      return {
         id: c.course_id,
         code: c.course_code,
         name: c.course_name,
         credits: c.credit_hours,
         program: c.program || "Diploma",
         term: c.term_name,
-        dates: c.start_date && c.end_date ? `${c.start_date} - ${c.end_date}` : "",
+        dates: startDate && endDate ? `${startDate} to ${endDate}` : "",
         enrollment: { current: c.current_enrollment || 0, max: c.max_enrollment || 30 },
         instructor: c.instructor || "TBA",
         status: c.status || "Active",
-      }));
+      };
+    });
+
 
       setCourses(mappedCourses);
     } catch (err) {
