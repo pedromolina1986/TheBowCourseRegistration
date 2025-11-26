@@ -19,9 +19,6 @@ router.get("/courses/:id", getCourseById);
 router.get("/courses/search/:keyword", searchCourses);
 
 
-// Student/Admin logged in → registration
-router.post("/courses/register", verifyToken, registerForCourse);
-
 // Admin-only actions
 router.post("/courses", verifyToken, authorizeAdmin, createCourse);
 router.put("/courses/:id", verifyToken, authorizeAdmin, updateCourse);
