@@ -1,14 +1,16 @@
 import express from "express";
+import { submitMessage, listMessages, respondMessage } from "../controllers/messageController.js";
+import { verifyToken, authorizeAdmin } from "../middleware/auth.js";
+
 const router = express.Router();
 
-// send a message (contact form)
-router.post("/messages", (req, res) => {
-  res.status(201).json({ ok: true, route: "POST /messages", body: req.body });
-});
+// Students submit message
+router.post("/messages", verifyToken, submitMessage);
 
-// list messages (admin)
-router.get("/messages", (req, res) => {
-  res.json({ ok: true, route: "GET /messages" });
-});
+// Admin list messages
+router.get("/messages", verifyToken, authorizeAdmin, listMessages);
+
+// Admin responds to a message
+router.patch("/messages/:id", verifyToken, authorizeAdmin, respondMessage);
 
 export default router;

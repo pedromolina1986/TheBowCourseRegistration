@@ -191,9 +191,66 @@ export async function loginUser(req, res) {
 export async function getUsers(req, res) {
   try {
     const pool = await getPool();
+
     const result = await pool.request()
-      .query("SELECT user_id AS id, user_name, user_type FROM Users ORDER BY user_id DESC");
-    return res.json(result.recordset);
+      .query(`
+        SELECT 
+          u.user_id AS id,
+          u.user_name,
+          u.user_type,
+          s.student_id,
+          s.first_name AS student_first_name,
+          s.last_name AS student_last_name,
+          s.email AS student_email,
+          s.program,
+          s.year_level,
+          s.assigned_by,
+          a.admin_id,
+          a.first_name AS admin_first_name,
+          a.last_name AS admin_last_name,
+          a.email AS admin_email,
+          a.phone_number,
+          a.department_id
+        FROM Users u
+        LEFT JOIN Student s ON u.user_id = s.user_id
+        LEFT JOIN Admin a ON u.user_id = a.user_id
+        ORDER BY u.user_id DESC
+      `);
+
+    // Map result to include only relevant details
+    const users = result.recordset.map(u => {
+      let details = null;
+      if (u.user_type.toLowerCase() === "student") {
+        details = {
+          student_id: u.student_id,
+          first_name: u.student_first_name,
+          last_name: u.student_last_name,
+          email: u.student_email,
+          program: u.program,
+          year_level: u.year_level,
+          assigned_by: u.assigned_by
+        };
+      } else if (u.user_type.toLowerCase() === "admin") {
+        details = {
+          admin_id: u.admin_id,
+          first_name: u.admin_first_name,
+          last_name: u.admin_last_name,
+          email: u.admin_email,
+          phone_number: u.phone_number,
+          department_id: u.department_id
+        };
+      }
+
+      return {
+        id: u.id,
+        user_name: u.user_name,
+        user_type: u.user_type,
+        details
+      };
+    });
+
+    return res.json(users);
+
   } catch (err) {
     console.error("getUsers:", err);
     return res.status(500).json({ error: "Failed to retrieve users" });
@@ -202,23 +259,154 @@ export async function getUsers(req, res) {
 
 // GET /api/v1/users/:id
 export async function getUserById(req, res) {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    return res.status(400).json({ error: "Invalid id" });
+  }
+
   try {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
-
     const pool = await getPool();
-    const result = await pool.request()
-      .input("id", sql.Int, id)
-      .query("SELECT user_id AS id, user_name, user_type FROM Users WHERE user_id = @id");
 
-    const user = result.recordset[0];
+    // Check base user
+    const userQuery = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT 
+          user_id AS id,
+          user_name,
+          user_type
+        FROM Users
+        WHERE user_id = @id
+      `);
+
+    const user = userQuery.recordset[0];
     if (!user) return res.status(404).json({ error: "User not found" });
-    return res.json(user);
+
+    let details = null;
+
+    if (user.user_type.toLowerCase() === "student") {
+      const studentQuery = await pool.request()
+        .input("id", sql.Int, id)
+        .query(`
+          SELECT 
+            student_id,
+            user_id,
+            first_name,
+            last_name,
+            email,
+            program,
+            year_level,
+            assigned_by
+          FROM Student
+          WHERE user_id = @id
+        `);
+      details = studentQuery.recordset[0] || null;
+    }
+
+    if (user.user_type.toLowerCase() === "admin") {
+      const adminQuery = await pool.request()
+        .input("id", sql.Int, id)
+        .query(`
+          SELECT 
+            admin_id,
+            user_id,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            department_id
+          FROM Admin
+          WHERE user_id = @id
+        `);
+      details = adminQuery.recordset[0] || null;
+    }
+
+    return res.json({
+      user,
+      details
+    });
+
   } catch (err) {
-    console.error("getUserById:", err);
-    return res.status(500).json({ error: "Failed to retrieve user" });
+    console.error("getUserFullDetails:", err);
+    return res.status(500).json({ error: "Failed to retrieve user details" });
   }
 }
+
+// GET /api/v1/me
+export async function getLoggedInUserDetails(req, res) {
+  const { id, user_type } = req.user; // extracted from token
+
+  try {
+    const pool = await getPool();
+
+    const userQuery = await pool.request()
+      .input("id", sql.Int, id)
+      .query(`
+        SELECT 
+          user_id AS id,
+          user_name,
+          user_type
+        FROM Users
+        WHERE user_id = @id
+      `);
+
+    const user = userQuery.recordset[0];
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let details = null;
+
+    if (user_type.toLowerCase() === "student") {
+      const studentQuery = await pool.request()
+        .input("id", sql.Int, id)
+        .query(`
+          SELECT 
+            student_id,
+            user_id,
+            first_name,
+            last_name,
+            email,
+            program,
+            year_level,
+            assigned_by
+          FROM Student
+          WHERE user_id = @id
+        `);
+      details = studentQuery.recordset[0] || null;
+    }
+
+    if (user_type.toLowerCase() === "admin") {
+      const adminQuery = await pool.request()
+        .input("id", sql.Int, id)
+        .query(`
+          SELECT 
+            admin_id,
+            user_id,
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            department_id
+          FROM Admin
+          WHERE user_id = @id
+        `);
+      details = adminQuery.recordset[0] || null;
+    }
+
+    return res.json({
+      user,
+      details
+    });
+
+  } catch (err) {
+    console.error("getLoggedInUserDetails:", err);
+    return res.status(500).json({ error: "Failed to retrieve user details" });
+  }
+}
+
+
 
 // POST /api/v1/users (admin create)
 export async function createUser(req, res) {

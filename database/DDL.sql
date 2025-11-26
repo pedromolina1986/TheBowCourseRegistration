@@ -206,6 +206,7 @@ CREATE TABLE SubmittedForms (
     status VARCHAR(20),
     admin_response TEXT,
     response_date DATETIME,
+    priority VARCHAR(20) DEFAULT 'Low',
     FOREIGN KEY (student_id) REFERENCES Student(student_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );

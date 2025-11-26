@@ -1,19 +1,19 @@
 import express from "express";
+import {
+  createRegistration,
+  listRegistrations,
+  deleteRegistration
+} from "../controllers/registrationController.js";
+
 const router = express.Router();
 
-// create a registration
-router.post("/registrations", (req, res) => {
-  res.status(201).json({ ok: true, route: "POST /registrations", body: req.body });
-});
+// Create
+router.post("/registrations", createRegistration);
 
-// list registrations by user
-router.get("/registrations/:userId", (req, res) => {
-  res.json({ ok: true, route: "GET /registrations/:userId", params: req.params });
-});
+// List by student
+router.get("/registrations/:userId", listRegistrations);
 
-// delete a registration
-router.delete("/registrations/:id", (req, res) => {
-  res.json({ ok: true, route: "DELETE /registrations/:id", params: req.params });
-});
+// Delete
+router.delete("/registrations/:id", deleteRegistration);
 
 export default router;

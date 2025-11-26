@@ -8,7 +8,9 @@ import {
   updateUser,
   patchUser,
   deleteUser,
+  getLoggedInUserDetails,
 } from "../controllers/userController.js";
+import { authorizeAdmin, verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -16,12 +18,17 @@ const router = express.Router();
 router.post("/users/register", registerUser);
 router.post("/users/login", loginUser);
 
-// Users CRUD
-router.get("/users", getUsers);
-router.get("/users/:id", getUserById);
-router.post("/users", createUser);
-router.put("/users/:id", updateUser);
-router.patch("/users/:id", patchUser);
-router.delete("/users/:id", deleteUser);
+// Logged-in details
+router.get("/users/me", verifyToken, getLoggedInUserDetails);
+
+// Admin-only Routes
+router.get("/users", verifyToken, authorizeAdmin, getUsers);
+router.get("/users/:id", verifyToken, authorizeAdmin, getUserById);
+router.post("/users", verifyToken, authorizeAdmin, createUser);
+router.put("/users/:id", verifyToken, authorizeAdmin, updateUser);
+router.patch("/users/:id", verifyToken, authorizeAdmin, patchUser);
+router.delete("/users/:id", verifyToken, authorizeAdmin, deleteUser);
+
+
 
 export default router;
