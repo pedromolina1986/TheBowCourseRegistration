@@ -6,7 +6,6 @@ import {
   updateCourse,
   deleteCourse,
   searchCourses,
-  registerForCourse
 } from "../controllers/courseController.js";
 import { verifyToken, authorizeAdmin } from "../middleware/auth.js";
 

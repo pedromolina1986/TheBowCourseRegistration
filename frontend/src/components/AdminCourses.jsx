@@ -3,76 +3,76 @@ import { Search, RotateCcw, Grid, List, Eye, Edit, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api.js";
 
-const coursesData = await api.get("/courses");
-console.log("COURSES DATA", coursesData);
-const initialCoursesData = [
-  {
-    id: 1,
-    code: "SDEV-101",
-    name: "Introduction to Programming",
-    credits: 3,
-    program: "Diploma",
-    term: "Winter 2025",
-    dates: "Jan 15 - Mar 30",
-    enrollment: { current: 22, max: 25 },
-    instructor: "Dr. Smith",
-    status: "Active",
-  },
-  {
-    id: 2,
-    code: "SDEV-201",
-    name: "Advanced JavaScript Development",
-    credits: 4,
-    program: "Post-Diploma",
-    term: "Spring 2025",
-    dates: "Mar 15 - Jun 15",
-    enrollment: { current: 18, max: 20 },
-    instructor: "Prof. Johnson",
-    status: "Active",
-  },
-  {
-    id: 3,
-    code: "SDEV-150",
-    name: "Database Fundamentals",
-    credits: 3,
-    program: "Certificate",
-    term: "Summer 2025",
-    dates: "Jun 1 - Aug 30",
-    enrollment: { current: 0, max: 15 },
-    instructor: "TBA",
-    status: "Draft",
-  },
-  {
-    id: 4,
-    code: "SDEV-301",
-    name: "Full Stack Web Development",
-    credits: 5,
-    program: "Diploma",
-    term: "Fall 2025",
-    dates: "Sep 5 - Dec 15",
-    enrollment: { current: 15, max: 30 },
-    instructor: "Dr. Williams",
-    status: "Active",
-  },
-  {
-    id: 5,
-    code: "SDEV-250",
-    name: "Mobile App Development",
-    credits: 4,
-    program: "Post-Diploma",
-    term: "Winter 2025",
-    dates: "Jan 10 - Apr 5",
-    enrollment: { current: 12, max: 18 },
-    instructor: "Prof. Davis",
-    status: "Active",
-  },
-];
+// const coursesData = await api.get("/courses");
+// console.log("COURSES DATA", coursesData);
+// const initialCoursesData = [
+//   {
+//     id: 1,
+//     code: "SDEV-101",
+//     name: "Introduction to Programming",
+//     credits: 3,
+//     program: "Diploma",
+//     term: "Winter 2025",
+//     dates: "Jan 15 - Mar 30",
+//     enrollment: { current: 22, max: 25 },
+//     instructor: "Dr. Smith",
+//     status: "Active",
+//   },
+//   {
+//     id: 2,
+//     code: "SDEV-201",
+//     name: "Advanced JavaScript Development",
+//     credits: 4,
+//     program: "Post-Diploma",
+//     term: "Spring 2025",
+//     dates: "Mar 15 - Jun 15",
+//     enrollment: { current: 18, max: 20 },
+//     instructor: "Prof. Johnson",
+//     status: "Active",
+//   },
+//   {
+//     id: 3,
+//     code: "SDEV-150",
+//     name: "Database Fundamentals",
+//     credits: 3,
+//     program: "Certificate",
+//     term: "Summer 2025",
+//     dates: "Jun 1 - Aug 30",
+//     enrollment: { current: 0, max: 15 },
+//     instructor: "TBA",
+//     status: "Draft",
+//   },
+//   {
+//     id: 4,
+//     code: "SDEV-301",
+//     name: "Full Stack Web Development",
+//     credits: 5,
+//     program: "Diploma",
+//     term: "Fall 2025",
+//     dates: "Sep 5 - Dec 15",
+//     enrollment: { current: 15, max: 30 },
+//     instructor: "Dr. Williams",
+//     status: "Active",
+//   },
+//   {
+//     id: 5,
+//     code: "SDEV-250",
+//     name: "Mobile App Development",
+//     credits: 4,
+//     program: "Post-Diploma",
+//     term: "Winter 2025",
+//     dates: "Jan 10 - Apr 5",
+//     enrollment: { current: 12, max: 18 },
+//     instructor: "Prof. Davis",
+//     status: "Active",
+//   },
+// ];
 
 const SearchCourses = () => {
   const navigate = useNavigate();
 
   const [viewMode, setViewMode] = useState("list");
-  const [courses, setCourses] = useState(initialCoursesData);
+  const [courses, setCourses] = useState([]);
 
   // Filter states
   const [searchText, setSearchText] = useState("");
@@ -102,7 +102,35 @@ const SearchCourses = () => {
     }
   }, [isMobile]);
 
-  // Filter and sort courses
+  useEffect(() => {
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get("/courses");
+
+      const mappedCourses = res.data.map((c) => ({
+        id: c.course_id,
+        code: c.course_code,
+        name: c.course_name,
+        credits: c.credit_hours,
+        program: c.program || "Diploma",
+        term: c.term_name,
+        dates: c.start_date && c.end_date ? `${c.start_date} - ${c.end_date}` : "",
+        enrollment: { current: c.current_enrollment || 0, max: c.max_enrollment || 30 },
+        instructor: c.instructor || "TBA",
+        status: c.status || "Active",
+      }));
+
+      setCourses(mappedCourses);
+    } catch (err) {
+      console.error("Failed to load courses:", err);
+    }
+  };
+
+  fetchCourses();
+}, []);
+
+
+  // Filter + sort
   const filteredCourses = courses
     .filter((course) => {
       const matchesSearch =
@@ -136,18 +164,18 @@ const SearchCourses = () => {
       }
     });
 
-  // Clear all filters
+  // Delete course
+  const handleDelete = (courseId) => {
+    setCourses(courses.filter((course) => course.id !== courseId));
+    setDeleteConfirm(null);
+  };
+
+  // Clear filters
   const handleClearFilters = () => {
     setSearchText("");
     setProgramFilter("All Programs");
     setTermFilter("All Terms");
     setStatusFilter("All Statuses");
-  };
-
-  // Delete course
-  const handleDelete = (courseId) => {
-    setCourses(courses.filter((course) => course.id !== courseId));
-    setDeleteConfirm(null);
   };
 
   return (

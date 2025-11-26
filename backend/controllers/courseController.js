@@ -20,25 +20,45 @@ export async function getCourses(req, res) {
     const { q = "", term_id, instructor_id } = req.query || {};
     const pool = await getPool();
 
-    let query = `SELECT * FROM Course WHERE 1=1`;
+    let query = `
+      SELECT 
+        c.course_id,
+        c.course_code,
+        c.course_name,
+        c.description,
+        c.credit_hours,
+        c.capacity,
+        c.instructor_id,
+        c.modified_by,
+        c.modified_at,
+        t.term_name,
+        t.start_date,
+        t.end_date,
+        CONCAT(i.first_name, ' ', i.last_name) AS instructor
+      FROM Course c
+      LEFT JOIN Term t ON c.term_id = t.term_id
+      LEFT JOIN Instructor i ON c.instructor_id = i.instructor_id
+      WHERE 1=1
+    `;
+
     const r = pool.request();
 
     if (q) {
-      query += ` AND (LOWER(course_code) LIKE LOWER(@q) OR LOWER(course_name) LIKE LOWER(@q))`;
+      query += ` AND (LOWER(c.course_code) LIKE LOWER(@q) OR LOWER(c.course_name) LIKE LOWER(@q))`;
       r.input("q", sql.NVarChar, `%${q}%`);
     }
 
     if (term_id) {
-      query += ` AND term_id = @term_id`;
+      query += ` AND c.term_id = @term_id`;
       r.input("term_id", sql.Int, term_id);
     }
 
     if (instructor_id) {
-      query += ` AND instructor_id = @instructor_id`;
+      query += ` AND c.instructor_id = @instructor_id`;
       r.input("instructor_id", sql.Int, instructor_id);
     }
 
-    query += ` ORDER BY course_id DESC`;
+    query += ` ORDER BY c.course_id DESC`;
 
     const result = await r.query(query);
     return res.json(result.recordset);
