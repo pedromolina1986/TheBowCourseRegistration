@@ -16,6 +16,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api"; // Import your API utility
 
 // --- Mock Data / API Simulation ---
 
@@ -42,14 +43,19 @@ const quickActions = [
  */
 const mockFetchDashboardData = async () => {
   
+  //api which returns stats
+  const statsAPI = await api.get("/dashboard/stats/admin");
+
+  //const enrollmentAPI = api.get("/dashboard/enrollment");
+  //const activitiesAPI = api.get("/dashboard/activities");
+  //const questionsAPI = api.get("/dashboard/questions");
+  //api which return enrollment data
+  //api which return recent activities
+  //api which return student questions
+
   // The actual mock data payload
   return {
-    stats: [
-      { label: "Total Students", value: "156", change: "+12 this month", icon: Users, colors: "text-blue-300" },
-      { label: "Active Courses", value: "24", change: "+3 this term", icon: BarChart3, colors: "text-green-300" },
-      { label: "Programs", value: "3", change: "Diploma, Post-Diploma, Certificate", icon: GraduationCap, colors: "text-purple-300" },
-      { label: "Pending Forms", value: "8", change: "2 urgent", icon: Mail, colors: "text-red-300" },
-    ],
+    stats: statsAPI.data,
     enrollmentData: [
       { program: "Software Development - Diploma", duration: "2 years • Winter Term", students: 68 },
       { program: "Software Development - Post-Diploma", duration: "1 year • Winter Term", students: 45 },
