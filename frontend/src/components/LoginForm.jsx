@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
 import ColorButtonFull from './ColorButtonFull';
+import api from '../services/api.js';
 
 const LoginForm = () => {
         
@@ -13,28 +14,30 @@ const LoginForm = () => {
     setMessage("");
 
     try {
-        const response = await fetch("http://localhost:5000/api/v1/users/login", {
+        /*const response = await fetch("http://localhost:5000/api/v1/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_name: username, user_password: password })
-        });
+        });*/
 
-        const result = await response.json();
+        const result = await api.post("users/login", { user_name: username, user_password: password });
+        console.log("API Response:", result);
 
-        if (!response.ok) {
+        
+        if (!result.status || result.status !== 200) {
         setMessage(result.error || "❌ Login failed");
         return;
         }
 
         // Save token & user info
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("currentUser", JSON.stringify(result.user));
+        localStorage.setItem("token", result.data.token);
+        localStorage.setItem("currentUser", JSON.stringify(result.data.user));
         localStorage.setItem("isLoggedIn", "true");
 
         // Redirect based on user type
-        if (result.user.user_type === "admin") {
+        if (result.data.user.user_type === "admin") {
         window.location.href = "#/dashboard"; // admin default
-        } else if (result.user.user_type === "student") {
+        } else if (result.data.user.user_type === "student") {
         window.location.href = "#/dashboard/studentdashboard"; // student default
         }
 
