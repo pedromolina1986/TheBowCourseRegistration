@@ -8,7 +8,8 @@ import {
   searchCourses,
   registerForCourse
 } from "../controllers/courseController.js";
-import { verifyToken } from "../middleware/auth.js";
+import { verifyToken, authorizeAdmin } from "../middleware/auth.js";
+
 
 
 const router = express.Router();

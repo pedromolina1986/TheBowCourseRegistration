@@ -129,7 +129,9 @@ const DashboardAdmin = () => {
             </div>
             <div>
               <h2 className="text-lg sm:text-xl font-semibold text-white">
-                John Smith
+                {localStorage.getItem("currentUser")
+                  ? JSON.parse(localStorage.getItem("currentUser")).user_name
+                  : "Admin User"}
               </h2>
               <p className="text-sm text-white">
                 Administrator • SD Department
