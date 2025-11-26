@@ -1,38 +1,31 @@
 import express from "express";
+import {
+  getCourses,
+  getCourseById,
+  createCourse,
+  updateCourse,
+  deleteCourse,
+  searchCourses,
+  registerForCourse
+} from "../controllers/courseController.js";
+import { verifyToken } from "../middleware/auth.js";
+
+
 const router = express.Router();
 
-router.get("/courses", (req, res) => {
-  res.json({ ok: true, route: "GET /courses", query: req.query });
-});
+router.get("/courses", getCourses);
+router.get("/courses/:id", getCourseById);
+router.get("/courses/search/:keyword", searchCourses);
 
-// read one
-router.get("/courses/:id", (req, res) => {
-  res.json({ ok: true, route: "GET /courses/:id", params: req.params });
-});
 
-// create
-router.post("/courses", (req, res) => {
-  res.status(201).json({ ok: true, route: "POST /courses", body: req.body });
-});
+// Student/Admin logged in → registration
+router.post("/courses/register", verifyToken, registerForCourse);
 
-// update (PUT)
-router.put("/courses/:id", (req, res) => {
-  res.json({ ok: true, route: "PUT /courses/:id", params: req.params, body: req.body });
-});
+// Admin-only actions
+router.post("/courses", verifyToken, authorizeAdmin, createCourse);
+router.put("/courses/:id", verifyToken, authorizeAdmin, updateCourse);
+router.delete("/courses/:id", verifyToken, authorizeAdmin, deleteCourse);
 
-// delete
-router.delete("/courses/:id", (req, res) => {
-  res.json({ ok: true, route: "DELETE /courses/:id", params: req.params });
-});
 
-// search
-router.get("/courses/search/:keyword", (req, res) => {
-  res.json({ ok: true, route: "GET /courses/search/:keyword", params: req.params });
-});
-
-// optional stub to keep a consistent endpoint 
-router.post("/courses/register", (req, res) => {
-  res.status(400).json({ ok: false, route: "POST /courses/register", note: "Use /registrations instead" });
-});
 
 export default router;
