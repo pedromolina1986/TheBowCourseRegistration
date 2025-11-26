@@ -23,7 +23,7 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const userType = localStorage.getItem("currentUser")
-    ? JSON.parse(localStorage.getItem("currentUser")).userType
+    ? JSON.parse(localStorage.getItem("currentUser")).user_type
     : null;
 
   useEffect(() => {

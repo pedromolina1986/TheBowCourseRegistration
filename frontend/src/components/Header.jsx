@@ -7,7 +7,7 @@ const Header = () => {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const currentUser = JSON.parse(localStorage.getItem("currentUser") || '{}');
+  const currentUser = JSON.parse(localStorage.getItem("currentUser") || '{}');  
 
   // Dashboard Header
   if (location.pathname.includes('/dashboard')) {
