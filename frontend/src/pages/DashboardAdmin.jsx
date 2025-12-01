@@ -45,33 +45,16 @@ const mockFetchDashboardData = async () => {
   
   //api which returns stats
   const statsAPI = await api.get("/dashboard/stats/admin");
-
-  //const enrollmentAPI = api.get("/dashboard/enrollment");
-  //const activitiesAPI = api.get("/dashboard/activities");
-  //const questionsAPI = api.get("/dashboard/questions");
-  //api which return enrollment data
-  //api which return recent activities
-  //api which return student questions
+  const enrollmentAPI = await api.get("/dashboard/enrollment/admin");
+  const activitiesAPI = await api.get("/dashboard/activities/admin");
+  const questionsAPI = await api.get("/dashboard/questions/admin");
 
   // The actual mock data payload
   return {
     stats: statsAPI.data,
-    enrollmentData: [
-      { program: "Software Development - Diploma", duration: "2 years • Winter Term", students: 68 },
-      { program: "Software Development - Post-Diploma", duration: "1 year • Winter Term", students: 45 },
-      { program: "Software Development - Certificate", duration: "6 months • Spring Term", students: 43 },
-    ],
-    recentActivities: [
-      { type: "registration", title: "New student registration", description: "Sarah Johnson enrolled in Diploma program", time: "2 hours ago", icon: UserPlus, colors: "bg-blue-500/10 text-blue-500" },
-      { type: "course", title: "Course created", description: "Advanced JavaScript course added", time: "5 hours ago", icon: Plus, colors: "bg-green-500/10 text-green-500" },
-      { type: "form", title: "Form submitted", description: "Michael Chen submitted course inquiry", time: "1 day ago", icon: Mail, colors: "bg-red-500/10 text-red-500" },
-      { type: "update", title: "Course updated", description: "Database Design course schedule modified", time: "2 days ago", icon: Edit, colors: "bg-purple-500/10 text-purple-500" },
-    ],
-    studentQuestions: [
-      { name: "Emily Rodriguez", program: "Diploma Program", question: "Question about prerequisite courses for Advanced Database course. When will registration open?", time: "3 hours ago", status: "New" },
-      { name: "David Park", program: "Post-Diploma Program", question: "Need clarification on course schedule conflicts between Web Development and Mobile App courses.", time: "1 day ago", status: "Pending" },
-      { name: "Lisa Chen", program: "Certificate Program", question: "Payment deadline approaching but unable to access payment portal. Please assist.", time: "2 days ago", status: "Urgent" },
-    ]
+    enrollmentData: enrollmentAPI.data,
+    recentActivities: activitiesAPI.data,
+    studentQuestions: questionsAPI.data
   };
 };
 

@@ -7,6 +7,7 @@ export function verifyToken(req, res, next) {
   // Try Authorization header first
   if (req.headers.authorization) {
     const parts = req.headers.authorization.split(" ");
+    
     if (parts.length === 2 && parts[0] === "Bearer") token = parts[1];
   }
 
@@ -20,6 +21,7 @@ export function verifyToken(req, res, next) {
     req.user = decoded; // attach { id, user_type } to req
     next();
   } catch (err) {
+    console.error("verifyToken:", err);
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }
