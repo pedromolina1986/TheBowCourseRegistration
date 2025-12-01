@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GraduationCap } from 'lucide-react';
 import ColorButton from './ColorButton';
+import api from '../services/api'
 
 const RegisterForm = () => {
   const [firstName, setFirstName] = useState('');
@@ -36,12 +37,8 @@ const RegisterForm = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5002/api/v1/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+      const response = await api.post("users/register", 
+        {
           user_name: username,
           user_password: password,
           user_type: "student",
@@ -53,11 +50,12 @@ const RegisterForm = () => {
           department_id: 1,
           year_level: yearLevel,
           assigned_by: 1
-        })
-      });
+        }
+      );
 
       // Check if server responded
-      if (!response) {
+      console.log(response);
+      if (response.status !== 201) {
         alert("❌ No response from server. Is it running on port 5000?");
         return;
       }
@@ -65,17 +63,12 @@ const RegisterForm = () => {
       // Try parsing JSON
       let result;
       try {
-        result = await response.json();
+        console.log("Raw response data:", response.data);
+        result = response.data;
+        console.log("Parsed JSON response:", result);
       } catch (jsonError) {
         console.error("JSON parse error:", jsonError);
         alert("❌ Server returned invalid JSON. Check backend.");
-        return;
-      }
-
-      // Handle server error messages
-      if (!response.ok) {
-        console.error("Server error response:", result);
-        alert(`❌ Registration failed: ${result.error || JSON.stringify(result)}`);
         return;
       }
 
