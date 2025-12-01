@@ -11,10 +11,10 @@ import { verifyToken, authorizeAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.get("/dashboard/stats/:type", verifyToken, getStats);
-router.get("/dashboard/enrollment/:type", verifyToken, getEnrollment);
-router.get("/dashboard/activities/:type", verifyToken, getActivities);
-router.get("/dashboard/questions/:type", verifyToken, getQuestions);
+router.get("/dashboard/stats/:type", verifyToken, authorizeAdmin, getStats);
+router.get("/dashboard/enrollment/:type", verifyToken, authorizeAdmin, getEnrollment);
+router.get("/dashboard/activities/:type", verifyToken, authorizeAdmin, getActivities);
+router.get("/dashboard/questions/:type", verifyToken, authorizeAdmin, getQuestions);
 
 
 export default router;
