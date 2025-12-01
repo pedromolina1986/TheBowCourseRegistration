@@ -166,7 +166,6 @@ export async function loginUser(req, res) {
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     const validPassword = await bcrypt.compare(user_password, user.user_password);
-    
     if (!validPassword) return res.status(401).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
@@ -255,7 +254,7 @@ export async function getUsers(req, res) {
   } catch (err) {
     console.error("getUsers:", err);
     return res.status(500).json({ error: "Failed to retrieve users" });
-  }
+  } 
 }
 
 // GET /api/v1/users/:id
