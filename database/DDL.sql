@@ -1,29 +1,29 @@
 ﻿-- 1️⃣ Criar o banco de dados
 CREATE DATABASE TheBowCourse;
 GO
-
+ 
 -- 2️⃣ Usar o banco recém-criado
 USE TheBowCourse;
 GO
-
+ 
 -- 3️⃣ Criar o login no servidor (nível global)
 IF NOT EXISTS (SELECT name FROM sys.sql_logins WHERE name = 'bowcourse_sql')
 BEGIN
-    CREATE LOGIN bowcourse_sql 
+    CREATE LOGIN bowcourse_sql
     WITH PASSWORD = '12345',
          CHECK_POLICY = OFF,       -- Desativa política de complexidade
          CHECK_EXPIRATION = OFF;   -- Desativa expiração de senha
 END;
 GO
-
+ 
 -- 4️⃣ Criar o usuário no banco de dados e vinculá-lo ao login
 CREATE USER bowcourse_sql FOR LOGIN bowcourse_sql;
 GO
-
+ 
 -- 5️⃣ Conceder permissões completas sobre o banco
 EXEC sp_addrolemember 'db_owner', 'bowcourse_sql';
 GO
-
+ 
 -- 6️⃣ Criar a tabela Users
 CREATE TABLE Users (
     user_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -37,7 +37,7 @@ CREATE TABLE Department (
     department_name VARCHAR(100),
     office_location VARCHAR(100)
 );
-
+ 
 -- Admin table
 CREATE TABLE dbo.Admin (
     admin_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -50,7 +50,7 @@ CREATE TABLE dbo.Admin (
     CONSTRAINT FK_Admin_User FOREIGN KEY (user_id) REFERENCES dbo.Users(user_id),
     CONSTRAINT FK_Admin_Department FOREIGN KEY (department_id) REFERENCES dbo.Department(department_id)
 );
-
+ 
 -- Instructor table
 CREATE TABLE Instructor (
     instructor_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -59,36 +59,6 @@ CREATE TABLE Instructor (
     email VARCHAR(100),
     department_id INT,
     FOREIGN KEY (department_id) REFERENCES Department(department_id)
-);
-
--- Student table
-CREATE TABLE Student (
-    student_id INT IDENTITY(1,1) PRIMARY KEY,
-    user_id INT NOT NULL,                   -- link to Users table
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    program VARCHAR(100),
-    term_id VARCHAR(50),
-    department_id INT(1,1),
-    year_level INT,
-    assigned_by INT, 
-    FOREIGN KEY (term_id) REFERENCES Term(term_id), 
-    FOREIGN KEY (department_id) REFERENCES Department(department_id),                       -- optional: which admin assigned the student
-    FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (assigned_by) REFERENCES Admin(admin_id)
-);
-
--- Profile table
-CREATE TABLE Profile (
-    profile_id INT IDENTITY(1,1) PRIMARY KEY,
-    student_id INT,
-    phone_number VARCHAR(15),
-    address VARCHAR(255),
-    date_of_birth DATE,
-    gender VARCHAR(10),
-    updated_at DATETIME,
-    FOREIGN KEY (student_id) REFERENCES Student(student_id)
 );
 
 -- Term table
@@ -100,6 +70,38 @@ CREATE TABLE Term (
     status VARCHAR(20)
 );
 
+ 
+-- Student table
+CREATE TABLE Student (
+    student_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,                   -- link to Users table
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    program VARCHAR(100),
+	department_id INT,
+	term_id INT,
+    year_level INT,
+    assigned_by INT,
+                     -- optional: which admin assigned the student
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+	FOREIGN KEY (department_id) REFERENCES Department(department_id),
+	FOREIGN KEY (term_id) REFERENCES Term(term_id),
+    FOREIGN KEY (assigned_by) REFERENCES Admin(admin_id)
+);
+ 
+-- Profile table
+CREATE TABLE Profile (
+    profile_id INT IDENTITY(1,1) PRIMARY KEY,
+    student_id INT,
+    phone_number VARCHAR(15),
+    address VARCHAR(255),
+    date_of_birth DATE,
+    gender VARCHAR(10),
+    updated_at DATETIME,
+    FOREIGN KEY (student_id) REFERENCES Student(student_id)
+);
+  
 -- Course table
 CREATE TABLE Course (
     course_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -116,7 +118,7 @@ CREATE TABLE Course (
     FOREIGN KEY (instructor_id) REFERENCES Instructor(instructor_id),
     FOREIGN KEY (modified_by) REFERENCES Admin(admin_id)
 );
-
+ 
 -- TermSelection table
 CREATE TABLE TermSelection (
     term_selection_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -126,7 +128,7 @@ CREATE TABLE TermSelection (
     FOREIGN KEY (student_id) REFERENCES Student(student_id),
     FOREIGN KEY (term_id) REFERENCES Term(term_id)
 );
-
+ 
 -- CourseRegistration table
 CREATE TABLE CourseRegistration (
     registration_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -139,7 +141,7 @@ CREATE TABLE CourseRegistration (
     FOREIGN KEY (course_id) REFERENCES Course(course_id),
     FOREIGN KEY (term_id) REFERENCES Term(term_id)
 );
-
+ 
 -- MyCourse table
 CREATE TABLE MyCourse (
     mycourse_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -152,7 +154,7 @@ CREATE TABLE MyCourse (
     FOREIGN KEY (course_id) REFERENCES Course(course_id),
     FOREIGN KEY (term_id) REFERENCES Term(term_id)
 );
-
+ 
 -- Dashboard table
 CREATE TABLE Dashboard (
     dashboard_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -162,7 +164,7 @@ CREATE TABLE Dashboard (
     recent_activity TEXT,
     FOREIGN KEY (student_id) REFERENCES Student(student_id)
 );
-
+ 
 -- ContactAdmin table
 CREATE TABLE ContactAdmin (
     contact_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -176,7 +178,7 @@ CREATE TABLE ContactAdmin (
     FOREIGN KEY (student_id) REFERENCES Student(student_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
-
+ 
 -- AdminDashboard table
 CREATE TABLE AdminDashboard (
     admin_dashboard_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -188,7 +190,7 @@ CREATE TABLE AdminDashboard (
     last_login DATETIME,
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
-
+ 
 -- AdminProfile table
 CREATE TABLE AdminProfile (
     admin_profile_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -198,7 +200,7 @@ CREATE TABLE AdminProfile (
     updated_at DATETIME,
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
-
+ 
 -- SubmittedForms table
 CREATE TABLE SubmittedForms (
     form_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -214,7 +216,7 @@ CREATE TABLE SubmittedForms (
     FOREIGN KEY (student_id) REFERENCES Student(student_id),
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
-
+ 
 -- SignUp table
 CREATE TABLE SignUp (
     signup_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -227,7 +229,7 @@ CREATE TABLE SignUp (
     phone_number VARCHAR(15),
     program VARCHAR(100)
 );
-
+ 
 -- Login table
 CREATE TABLE Login (
     login_id INT IDENTITY(1,1) PRIMARY KEY,
@@ -242,5 +244,4 @@ CREATE TABLE Login (
     FOREIGN KEY (admin_id) REFERENCES Admin(admin_id)
 );
 GO
-
-
+ 
