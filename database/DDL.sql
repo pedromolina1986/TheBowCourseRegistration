@@ -69,8 +69,12 @@ CREATE TABLE Student (
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL,
     program VARCHAR(100),
+    term_id VARCHAR(50),
+    department_id INT(1,1),
     year_level INT,
-    assigned_by INT,                        -- optional: which admin assigned the student
+    assigned_by INT, 
+    FOREIGN KEY (term_id) REFERENCES Term(term_id), 
+    FOREIGN KEY (department_id) REFERENCES Department(department_id),                       -- optional: which admin assigned the student
     FOREIGN KEY (user_id) REFERENCES Users(user_id),
     FOREIGN KEY (assigned_by) REFERENCES Admin(admin_id)
 );
