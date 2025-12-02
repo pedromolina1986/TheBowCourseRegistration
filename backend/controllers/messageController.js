@@ -11,24 +11,24 @@ async function getPool() {
 //    Student sends a message
 export async function submitMessage(req, res) {
   try {
-    const { studentId, subject, message, priority } = req.body;
-
-    if (!studentId || !subject || !message) {
+    const { student_id, subject, issue_description, priority } = req.body;
+    console.log(student_id, subject, issue_description, priority);
+    if (!student_id || !subject || !issue_description) {
       return res.status(400).json({ error: "studentId, subject, and message are required" });
     }
 
     const pool = await getPool();
     const result = await pool.request()
-      .input("student_id", sql.NVarChar, studentId)
+      .input("student_id", sql.Int, student_id)
       .input("subject", sql.NVarChar, subject)
-      .input("issue_description", sql.NVarChar, message)
+      .input("issue_description", sql.NVarChar, issue_description)
       .input("priority", sql.NVarChar, priority || "Low")
       .input("submission_date", sql.DateTime, new Date())
       .input("status", sql.NVarChar, "Pending")
       .query(`
-        INSERT INTO SubmittedForms (student_id, subject, issue_description, submission_date, status, priority)
+        INSERT INTO SubmittedForms (student_id, subject, issue_description, submission_date, status, priority, admin_id)
         OUTPUT INSERTED.*
-        VALUES (@student_id, @subject, @issue_description, @submission_date, @status, @priority)
+        VALUES (@student_id, @subject, @issue_description, @submission_date, @status, @priority, (SELECT assigned_by FROM Student WHERE student_id=@student_id))
       `);
 
     return res.status(201).json(result.recordset[0]);

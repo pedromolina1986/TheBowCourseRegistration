@@ -12,9 +12,9 @@ async function getPool() {
 ================================ */
 export async function createRegistration(req, res) {
   try {
-    const { studentId, courseId, termId } = req.body;
+    const { student_id, course_id, term_id } = req.body;
 
-    if (!studentId || !courseId || !termId) {
+    if (!student_id || !course_id || !term_id) {
       return res.status(400).json({
         error: "studentId, courseId and termId are required",
       });
@@ -24,12 +24,12 @@ export async function createRegistration(req, res) {
 
     // Check if already registered
     const check = await pool.request()
-      .input("studentId", sql.Int, studentId)
-      .input("courseId", sql.Int, courseId)
-      .input("termId", sql.Int, termId)
+      .input("student_id", sql.Int, student_id)
+      .input("course_id", sql.Int, course_id)
+      .input("term_id", sql.Int, term_id)
       .query(`
         SELECT registration_id FROM CourseRegistration
-        WHERE student_id = @studentId AND course_id = @courseId AND term_id = @termId
+        WHERE student_id = @student_id AND course_id = @course_id AND term_id = @term_id
       `);
 
     if (check.recordset.length > 0) {
@@ -40,15 +40,15 @@ export async function createRegistration(req, res) {
 
     // Insert registration
     const result = await pool.request()
-      .input("studentId", sql.Int, studentId)
-      .input("courseId", sql.Int, courseId)
-      .input("termId", sql.Int, termId)
+      .input("student_id", sql.Int, student_id)
+      .input("course_id", sql.Int, course_id)
+      .input("term_id", sql.Int, term_id)
       .input("date", sql.Date, new Date())
-      .input("status", sql.NVarChar, "Active")
+      .input("status", sql.NVarChar, "Registered")
       .query(`
         INSERT INTO CourseRegistration (student_id, course_id, term_id, registration_date, status)
         OUTPUT INSERTED.*
-        VALUES (@studentId, @courseId, @termId, @date, @status)
+        VALUES (@student_id, @course_id, @term_id, @date, @status)
       `);
 
     return res.status(201).json(result.recordset[0]);
