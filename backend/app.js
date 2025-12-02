@@ -21,6 +21,7 @@ import messageRoutes from "./routes/messageRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
 import termRoutes from "./routes/termRoutes.js";
+import instructorRoutes from "./routes/instructorRoutes.js"; 
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -65,6 +66,7 @@ app.use("/api/v1", messageRoutes);
 app.use("/api/v1", dashboardRoutes);
 app.use("/api/v1", departmentRoutes);
 app.use("/api/v1", termRoutes);
+app.use("/api/v1", instructorRoutes);
 
 // 404 for unknown routes
 app.use((req, res) => {
