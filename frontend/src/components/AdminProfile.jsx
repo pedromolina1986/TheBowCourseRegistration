@@ -72,13 +72,25 @@ const ProfileManagement = () => {
   // Save profile via PATCH
   const handleSave = async () => {
     try {
-      const res = await api.patch("/users/me", editData);
-      setProfileData(res.data);
+      const { first_name, last_name, email, phone_number, department_id, role, employee_id, start_date } = editData;
+
+      const payload = {
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        department_id
+      };
+
+      const res = await api.patch("/users/me", payload);
+      setProfileData(editData);
       setIsEditing(false);
     } catch (err) {
       console.error("Save profile failed:", err);
     }
   };
+
+
 
   return (
     <div className="p-4 sm:p-6 md:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
@@ -149,7 +161,7 @@ const ProfileManagement = () => {
                   <EditField label="Phone Number" field="phone_number" value={editData.phone_number} onChange={handleChange} />
                   <EditField label="Department" field="department_id" value={editData.department_id} onChange={handleChange} />
                   <EditField label="Role" field="role" value={editData.role} onChange={handleChange} />
-                  <EditField label="Employee ID" field="employee_id" value={editData.employee_id} onChange={handleChange} />
+                  <EditField label="Employee ID" field="employee_id" value={editData.admin_id} onChange={handleChange} />
                   <EditField label="Start Date" field="start_date" value={editData.start_date} onChange={handleChange} />
                 </>
               ) : (
@@ -160,7 +172,7 @@ const ProfileManagement = () => {
                   <InfoField label="Phone" value={profileData.phone_number} />
                   <InfoField label="Department" value={profileData.department_id} />
                   <InfoField label="Role" value={profileData.role} />
-                  <InfoField label="Employee ID" value={profileData.employee_id} />
+                  <InfoField label="Employee ID" value={profileData.admin_id} />
                   <InfoField label="Start Date" value={profileData.start_date} />
                 </>
               )}
@@ -198,9 +210,9 @@ const ProfileManagement = () => {
             </div>
             <div className="p-4 sm:p-6">
               <InfoField label="Account Status" value="Active" />
-              <InfoField label="Last Login" value="-" />
+              <InfoField label="Last Login" value={profileData.last_login ? new Date(profileData.last_login).toLocaleString() : "-"} />
               <InfoField label="Password Updated" value="-" />
-              <InfoField label="Profile Updated" value="-" />
+              <InfoField label="Profile Updated" value={profileData.profile_updated ? new Date(profileData.profile_updated).toLocaleString() : "-"} />
             </div>
           </div>
         </div>

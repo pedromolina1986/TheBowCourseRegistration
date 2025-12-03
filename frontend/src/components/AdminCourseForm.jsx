@@ -1,232 +1,186 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { RefreshCw, Search, X, Plus, Save, Trash2 } from "lucide-react";
+import api from "../services/api.js";
 
-const initialCourses = [
-  {
-    code: "CS101",
-    name: "Introduction to Programming",
-    term: "Winter 2025",
-    program: "Software Development - Diploma",
-    description:
-      "This course introduces students to fundamental programming concepts using modern programming languages. Students will learn basic programming constructs, problem-solving techniques, and software development practices.",
-    startDate: "2025-01-15",
-    endDate: "2025-04-30",
-    credits: 3,
-    maxEnrollment: 30,
-    status: "Active",
-    instructor: "Dr. Sarah Johnson",
-    location: "Room 201, Building A",
-    prerequisites: ["High School Mathematics", "Basic Computer Skills"],
-  },
-  {
-    code: "CS201",
-    name: "Data Structures",
-    term: "Spring 2025",
-    program: "Software Development - Diploma",
-    description:
-      "Advanced study of data structures and algorithms including arrays, linked lists, trees, and graphs.",
-    startDate: "2025-05-01",
-    endDate: "2025-08-15",
-    credits: 4,
-    maxEnrollment: 25,
-    status: "Active",
-    instructor: "Prof. Michael Chen",
-    location: "Room 305, Building B",
-    prerequisites: ["CS101"],
-  },
-  {
-    code: "CS301",
-    name: "Database Systems",
-    term: "Summer 2025",
-    program: "Software Development - Post-Diploma",
-    description:
-      "Comprehensive introduction to database design, SQL, and database management systems.",
-    startDate: "2025-06-01",
-    endDate: "2025-09-30",
-    credits: 3,
-    maxEnrollment: 35,
-    status: "Active",
-    instructor: "Dr. Emily Williams",
-    location: "Room 102, Building C",
-    prerequisites: ["CS201"],
-  },
-  {
-    code: "CS401",
-    name: "Web Development",
-    term: "Fall 2025",
-    program: "Software Development - Certificate",
-    description:
-      "Modern web development using HTML, CSS, JavaScript, and popular frameworks.",
-    startDate: "2025-09-15",
-    endDate: "2025-12-20",
-    credits: 4,
-    maxEnrollment: 40,
-    status: "Draft",
-    instructor: "Prof. David Park",
-    location: "Room 401, Building A",
-    prerequisites: ["CS101", "CS201"],
-  },
-];
-
-const emptyCourseTe = {
-  code: "",
-  name: "",
-  term: "Winter 2025",
-  program: "Software Development - Diploma",
-  description: "",
-  startDate: "",
-  endDate: "",
-  credits: 3,
-  maxEnrollment: 30,
-  status: "Draft",
-  instructor: "Dr. Sarah Johnson",
-  location: "",
-  prerequisites: [],
+const emptyCourse = {
+  course_id: null,
+  course_code: "-",
+  course_name: "-",
+  description: "-",
+  credit_hours: 3,
+  capacity: 30,
+  instructor_id: null,
+  term_id: null,
+  status: "Active",
 };
 
 const EditCourse = () => {
-  const [availableCourses, setAvailableCourses] = useState(initialCourses);
-  const [selectedCourseCode, setSelectedCourseCode] = useState("CS101");
+  const [courses, setCourses] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [courseData, setCourseData] = useState(emptyCourse);
   const [searchTerm, setSearchTerm] = useState("");
-  const [courseData, setCourseData] = useState(initialCourses[0]);
   const [saveMessage, setSaveMessage] = useState("");
-  const [showPrereqModal, setShowPrereqModal] = useState(false);
-  const [selectedPrereq, setSelectedPrereq] = useState("");
   const [isNewCourse, setIsNewCourse] = useState(false);
 
-  const filteredCourses = availableCourses.filter(
+  const [instructors, setInstructors] = useState([]);
+  const [terms, setTerms] = useState([]);
+
+  // Fetch courses
+  const fetchCourses = async () => {
+    try {
+      const res = await api.get("courses");
+      const mapped = res.data.map((c) => ({
+        course_id: c.course_id,
+        course_code: c.course_code || "-",
+        course_name: c.course_name || "-",
+        description: c.description || "-",
+        credit_hours: c.credit_hours || 3,
+        capacity: c.capacity || 30,
+        instructor_id: c.instructor_id || null,
+        term_id: c.term_id || null,
+        status: "Active",
+      }));
+      setCourses(mapped);
+      if (!selectedCourseId && mapped.length > 0) {
+        setSelectedCourseId(mapped[0].course_id);
+        setCourseData(mapped[0]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
+    }
+  };
+
+  // Fetch instructors
+  const fetchInstructors = async () => {
+    try {
+      const res = await api.get("instructors");
+      setInstructors(res.data);
+    } catch (err) {
+      console.error("Failed to fetch instructors:", err);
+    }
+  };
+
+  // Fetch terms
+  const fetchTerms = async () => {
+    try {
+      const res = await api.get("terms");
+      setTerms(res.data);
+    } catch (err) {
+      console.error("Failed to fetch terms:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+    fetchInstructors();
+    fetchTerms();
+  }, []);
+
+  const filteredCourses = courses.filter(
     (course) =>
-      course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.name.toLowerCase().includes(searchTerm.toLowerCase())
+      course.course_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.course_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const availablePrerequisites = availableCourses
-    .filter((course) => course.code !== courseData.code)
-    .map((course) => course.code + " - " + course.name);
-
-  const handleCourseSelect = (courseCode) => {
-    const course = availableCourses.find((c) => c.code === courseCode);
+  const handleCourseSelect = (id) => {
+    const course = courses.find((c) => c.course_id === id);
     if (course) {
       setCourseData({ ...course });
-      setSelectedCourseCode(courseCode);
-      setSaveMessage("");
+      setSelectedCourseId(id);
       setIsNewCourse(false);
+      setSaveMessage("");
     }
   };
 
   const handleNewCourse = () => {
-    setCourseData({ ...emptyCourseTe });
-    setSelectedCourseCode("");
-    setSaveMessage("");
+    setCourseData({ ...emptyCourse });
+    setSelectedCourseId(null);
     setIsNewCourse(true);
+    setSaveMessage("");
   };
 
   const handleFieldChange = (field, value) => {
     setCourseData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const removePrerequisite = (index) => {
-    setCourseData((prev) => ({
-      ...prev,
-      prerequisites: prev.prerequisites.filter((_, i) => i !== index),
-    }));
-  };
-
-  const addPrerequisite = () => {
-    if (selectedPrereq && !courseData.prerequisites.includes(selectedPrereq)) {
-      setCourseData((prev) => ({
-        ...prev,
-        prerequisites: [...prev.prerequisites, selectedPrereq],
-      }));
-      setSelectedPrereq("");
-      setShowPrereqModal(false);
-    }
-  };
-
   const validateCourse = () => {
-    if (!courseData.code.trim()) {
+    if (!courseData.course_code.trim()) {
       alert("Course code is required");
       return false;
     }
-    if (!courseData.name.trim()) {
+    if (!courseData.course_name.trim()) {
       alert("Course name is required");
       return false;
     }
-    if (!courseData.description.trim()) {
-      alert("Course description is required");
-      return false;
-    }
-    if (!courseData.startDate) {
-      alert("Start date is required");
-      return false;
-    }
-    if (!courseData.endDate) {
-      alert("End date is required");
-      return false;
-    }
-
-    // Check if course code already exists (only for new courses)
-    if (
-      isNewCourse &&
-      availableCourses.some((c) => c.code === courseData.code)
-    ) {
-      alert("A course with this code already exists");
-      return false;
-    }
-
     return true;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateCourse()) return;
 
-    if (isNewCourse) {
-      // Add new course
-      setAvailableCourses([...availableCourses, { ...courseData }]);
-      setSelectedCourseCode(courseData.code);
-      setIsNewCourse(false);
-      setSaveMessage("New course created successfully!");
-    } else {
-      // Update existing course
-      const updatedCourses = availableCourses.map((course) =>
-        course.code === selectedCourseCode ? { ...courseData } : course
-      );
-      setAvailableCourses(updatedCourses);
-      setSaveMessage("Changes saved successfully!");
-    }
+    const payload = {
+      term_id: courseData.term_id,
+      course_code: courseData.course_code,
+      course_name: courseData.course_name,
+      description: courseData.description,
+      credit_hours: courseData.credit_hours,
+      capacity: courseData.capacity,
+      instructor_id: courseData.instructor_id,
+      modified_by: 1,
+    };
 
-    setTimeout(() => setSaveMessage(""), 3000);
-    console.log("Saved course data:", courseData);
+    try {
+      if (isNewCourse) {
+        const res = await api.post("courses", payload);
+        setCourses([...courses, res.data]);
+        setSelectedCourseId(res.data.course_id);
+        setCourseData(res.data);
+        setIsNewCourse(false);
+        setSaveMessage("New course created successfully!");
+      } else {
+        await api.put(`courses/${courseData.course_id}`, payload);
+        const updated = courses.map((c) =>
+          c.course_id === courseData.course_id ? { ...courseData } : c
+        );
+        setCourses(updated);
+        setSaveMessage("Changes saved successfully!");
+      }
+      setTimeout(() => setSaveMessage(""), 3000);
+    } catch (err) {
+      console.error("Save failed:", err);
+      alert("Failed to save course. See console for details.");
+    }
   };
 
-  const handleDelete = () => {
-    if (confirm("Are you sure you want to delete " + courseData.code + "?")) {
-      const updatedCourses = availableCourses.filter(
-        (c) => c.code !== courseData.code
-      );
-      setAvailableCourses(updatedCourses);
+  const handleDelete = async () => {
+    if (!courseData.course_id) return;
+    if (!window.confirm("Are you sure you want to delete this course?")) return;
 
-      if (updatedCourses.length > 0) {
-        handleCourseSelect(updatedCourses[0].code);
+    try {
+      await api.delete(`courses/${courseData.course_id}`);
+      const updated = courses.filter((c) => c.course_id !== courseData.course_id);
+      setCourses(updated);
+      if (updated.length > 0) {
+        handleCourseSelect(updated[0].course_id);
       } else {
         handleNewCourse();
       }
-
       setSaveMessage("Course deleted successfully!");
       setTimeout(() => setSaveMessage(""), 3000);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete course. See console for details.");
     }
   };
 
   const handleCancel = () => {
-    if (isNewCourse && availableCourses.length > 0) {
-      handleCourseSelect(availableCourses[0].code);
-    } else if (!isNewCourse) {
-      const originalCourse = availableCourses.find(
-        (c) => c.code === selectedCourseCode
-      );
-      if (originalCourse) {
-        setCourseData({ ...originalCourse });
-      }
+    if (isNewCourse) {
+      if (courses.length > 0) handleCourseSelect(courses[0].course_id);
+      else setCourseData({ ...emptyCourse });
+      setIsNewCourse(false);
+    } else {
+      const original = courses.find((c) => c.course_id === selectedCourseId);
+      if (original) setCourseData({ ...original });
     }
     setSaveMessage("");
   };
@@ -234,23 +188,22 @@ const EditCourse = () => {
   return (
     <div className="p-4 sm:p-8 bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Sidebar - Available Courses */}
+        {/* Sidebar */}
         <div className="col-span-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-4 border-b flex justify-between items-center">
               <h3 className="font-semibold text-gray-900">Available Courses</h3>
               <div className="flex gap-2">
                 <button
                   onClick={handleNewCourse}
-                  className="p-1 hover:bg-blue-50 rounded transition-colors text-blue-600"
+                  className="p-1 hover:bg-blue-50 rounded text-blue-600"
                   title="Add New Course"
                 >
                   <Plus size={18} />
                 </button>
                 <button
-                  onClick={() => setSearchTerm("")}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
+                  onClick={fetchCourses}
+                  className="p-1 hover:bg-gray-100 rounded"
                   title="Refresh"
                 >
                   <RefreshCw size={18} className="text-gray-600" />
@@ -258,13 +211,9 @@ const EditCourse = () => {
               </div>
             </div>
 
-            {/* Search */}
-            <div className="p-4 border-b border-gray-200">
+            <div className="p-4 border-b">
               <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                 <input
                   type="text"
                   placeholder="Search courses..."
@@ -275,101 +224,58 @@ const EditCourse = () => {
               </div>
             </div>
 
-            {/* Course List */}
             <div className="p-2 max-h-[70vh] overflow-y-auto">
-              {isNewCourse && (
-                <button className="w-full text-left p-3 rounded-lg mb-1 transition-colors bg-blue-600 text-white">
-                  <p className="font-medium text-sm">New Course</p>
-                  <p className="text-xs mt-0.5 text-blue-100">
-                    Click to create
-                  </p>
-                </button>
-              )}
-              {filteredCourses.map((course, idx) => (
+              {courses.map((course) => (
                 <button
-                  key={idx}
-                  onClick={() => handleCourseSelect(course.code)}
+                  key={course.course_id}
+                  onClick={() => handleCourseSelect(course.course_id)}
                   className={`w-full text-left p-3 rounded-lg mb-1 transition-colors ${
-                    selectedCourseCode === course.code && !isNewCourse
+                    selectedCourseId === course.course_id && !isNewCourse
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white"
                       : "hover:bg-gray-50"
                   }`}
                 >
-                  <p
-                    className={`font-medium text-sm ${
-                      selectedCourseCode === course.code && !isNewCourse
-                        ? "text-white"
-                        : "text-gray-900"
-                    }`}
-                  >
-                    {course.code}
-                  </p>
-                  <p
-                    className={`text-xs mt-0.5 ${
-                      selectedCourseCode === course.code && !isNewCourse
-                        ? "text-white"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {course.name}
-                  </p>
-                  <p
-                    className={`text-xs mt-0.5 ${
-                      selectedCourseCode === course.code && !isNewCourse
-                        ? "text-white"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {course.term}
-                  </p>
+                  <p className="font-medium text-sm">{course.course_code}</p>
+                  <p className="text-xs mt-0.5">{course.course_name}</p>
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Main Content - Course Details */}
+        {/* Main Content */}
         <div className="col-span-1 lg:col-span-2">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            {/* Header */}
-            <div className="p-6 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="p-6 border-b flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">
                 {isNewCourse ? "New Course" : "Course Details"}
               </h3>
-              <div className="flex flex-wrap gap-2 justify-start sm:justify-end items-center">
-                {!isNewCourse && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    Last updated: Dec 20, 2024
-                  </div>
-                )}
+              <div className="flex gap-2">
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm"
+                  className="px-4 py-2 border border-gray-300 rounded text-gray-700 font-medium hover:bg-gray-50 text-sm"
                 >
                   Cancel
                 </button>
                 {!isNewCourse && (
                   <button
                     onClick={handleDelete}
-                    className="px-4 py-2 border border-red-300 text-red-600 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-red-50 transition-colors"
+                    className="px-4 py-2 border border-red-300 text-red-600 rounded text-sm font-medium hover:bg-red-50 flex items-center gap-2"
                   >
-                    <Trash2 size={16} />
-                    Delete
+                    <Trash2 size={16} /> Delete
                   </button>
                 )}
                 <button
                   onClick={handleSave}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium hover:bg-gray-800 transition-colors"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded flex items-center gap-2 text-sm font-medium hover:bg-gray-800"
                 >
-                  <Save size={16} />
-                  {isNewCourse ? "Create Course" : "Save Changes"}
+                  <Save size={16} /> {isNewCourse ? "Create Course" : "Save Changes"}
                 </button>
               </div>
             </div>
 
             {saveMessage && (
-              <div className="mx-6 mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              <div className="mx-6 mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
                 {saveMessage}
               </div>
             )}
@@ -379,293 +285,96 @@ const EditCourse = () => {
               {/* Course Code & Name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Course Code <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Course Code *</label>
                   <input
                     type="text"
-                    value={courseData.code}
-                    onChange={(e) => handleFieldChange("code", e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., CS101"
+                    value={courseData.course_code}
+                    onChange={(e) => handleFieldChange("course_code", e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Course Name <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Course Name *</label>
                   <input
                     type="text"
-                    value={courseData.name}
-                    onChange={(e) => handleFieldChange("name", e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Introduction to Programming"
+                    value={courseData.course_name}
+                    onChange={(e) => handleFieldChange("course_name", e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                </div>
-              </div>
-
-              {/* Program & Term */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Program <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={courseData.program}
-                    onChange={(e) =>
-                      handleFieldChange("program", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option>Software Development - Diploma</option>
-                    <option>Software Development - Post-Diploma</option>
-                    <option>Software Development - Certificate</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Term <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={courseData.term}
-                    onChange={(e) => handleFieldChange("term", e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option>Winter 2025</option>
-                    <option>Spring 2025</option>
-                    <option>Summer 2025</option>
-                    <option>Fall 2025</option>
-                  </select>
                 </div>
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Course Description <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-sm font-medium mb-2">Description</label>
                 <textarea
                   rows="4"
                   value={courseData.description}
-                  onChange={(e) =>
-                    handleFieldChange("description", e.target.value)
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  placeholder="Enter a detailed description of the course..."
+                  onChange={(e) => handleFieldChange("description", e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 />
               </div>
 
-              {/* Dates */}
+              {/* Credits / Capacity */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Credits</label>
                   <input
-                    type="date"
-                    value={courseData.startDate}
-                    onChange={(e) =>
-                      handleFieldChange("startDate", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    type="number"
+                    value={courseData.credit_hours}
+                    onChange={(e) => handleFieldChange("credit_hours", parseInt(e.target.value) || 0)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date <span className="text-red-500">*</span>
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Capacity</label>
                   <input
-                    type="date"
-                    value={courseData.endDate}
-                    onChange={(e) =>
-                      handleFieldChange("endDate", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    type="number"
+                    value={courseData.capacity}
+                    onChange={(e) => handleFieldChange("capacity", parseInt(e.target.value) || 0)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
               </div>
 
-              {/* Credits / Max Enrollment / Status */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Credits
-                  </label>
-                  <input
-                    type="number"
-                    value={courseData.credits}
-                    onChange={(e) =>
-                      handleFieldChange(
-                        "credits",
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="1"
-                    max="6"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Max Enrollment
-                  </label>
-                  <input
-                    type="number"
-                    value={courseData.maxEnrollment}
-                    onChange={(e) =>
-                      handleFieldChange(
-                        "maxEnrollment",
-                        parseInt(e.target.value) || 0
-                      )
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    min="1"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Course Status
-                  </label>
-                  <select
-                    value={courseData.status}
-                    onChange={(e) =>
-                      handleFieldChange("status", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option>Active</option>
-                    <option>Draft</option>
-                    <option>Archived</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Instructor & Location */}
+              {/* Instructor / Term */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Instructor
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Instructor</label>
                   <select
-                    value={courseData.instructor}
-                    onChange={(e) =>
-                      handleFieldChange("instructor", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value={courseData.instructor_id || ""}
+                    onChange={(e) => handleFieldChange("instructor_id", parseInt(e.target.value) || null)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option>Dr. Sarah Johnson</option>
-                    <option>Prof. Michael Chen</option>
-                    <option>Dr. Emily Williams</option>
-                    <option>Prof. David Park</option>
+                    <option value="">-</option>
+                    {instructors.map((inst) => (
+                      <option key={inst.instructor_id} value={inst.instructor_id}>
+                        {inst.first_name} {inst.last_name}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={courseData.location}
-                    onChange={(e) =>
-                      handleFieldChange("location", e.target.value)
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Room 201, Building A"
-                  />
-                </div>
-              </div>
 
-              {/* Prerequisites */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Prerequisites
-                </label>
-                <div className="space-y-2 mb-3">
-                  {courseData.prerequisites.map((prereq, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg border border-gray-200"
-                    >
-                      <span className="text-sm text-gray-900">{prereq}</span>
-                      <button
-                        onClick={() => removePrerequisite(idx)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  ))}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Term</label>
+                  <select
+                    value={courseData.term_id || ""}
+                    onChange={(e) => handleFieldChange("term_id", parseInt(e.target.value) || null)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">-</option>
+                    {terms.map((t) => (
+                      <option key={t.term_id} value={t.term_id}>
+                        {t.term_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <button
-                  onClick={() => setShowPrereqModal(true)}
-                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 font-medium"
-                >
-                  <Plus size={16} />
-                  Add Prerequisite
-                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {showPrereqModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Add Prerequisite
-              </h3>
-              <button
-                onClick={() => {
-                  setShowPrereqModal(false);
-                  setSelectedPrereq("");
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <div className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Course
-              </label>
-              <select
-                value={selectedPrereq}
-                onChange={(e) => setSelectedPrereq(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">-- Select a course --</option>
-                {availablePrerequisites.map((prereq, idx) => (
-                  <option key={idx} value={prereq}>
-                    {prereq}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
-              {isNewCourse && (
-                <button
-                  onClick={() => {
-                    setShowPrereqModal(false);
-                    setSelectedPrereq("");
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
-              <button
-                onClick={addPrerequisite}
-                disabled={!selectedPrereq}
-                className="px-4 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                Add Prerequisite
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

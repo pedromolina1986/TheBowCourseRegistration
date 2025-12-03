@@ -382,15 +382,20 @@ export async function getLoggedInUserDetails(req, res) {
         .input("id", sql.Int, id)
         .query(`
           SELECT 
-            admin_id,
-            user_id,
-            first_name,
-            last_name,
-            email,
-            phone_number,
-            department_id
-          FROM Admin
-          WHERE user_id = @id
+            a.admin_id,
+            a.user_id,
+            a.first_name,
+            a.last_name,
+            a.email,
+            a.phone_number,
+            a.department_id,
+            ap.position AS role,
+            ap.updated_at AS profile_updated,
+            ad.last_login
+          FROM Admin a
+          LEFT JOIN AdminProfile ap ON a.admin_id = ap.admin_id
+          LEFT JOIN AdminDashboard ad ON a.admin_id = ad.admin_id
+          WHERE a.user_id = @id
         `);
       details = adminQuery.recordset[0] || null;
     }
@@ -403,6 +408,115 @@ export async function getLoggedInUserDetails(req, res) {
   } catch (err) {
     console.error("getLoggedInUserDetails:", err);
     return res.status(500).json({ error: "Failed to retrieve user details" });
+  }
+}
+
+// PATCH /api/v1/users/me
+export async function patchLoggedInUser(req, res) {
+  const { id, user_type } = req.user;
+  const body = req.body;
+
+  const pool = await getPool();
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    // Fetch user from Users table
+    const request = new sql.Request(transaction);
+    const userResult = await request
+      .input("id", sql.Int, id)
+      .query("SELECT * FROM Users WHERE user_id=@id");
+
+    const user = userResult.recordset[0];
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Update Users table
+    const hashedPassword = body.user_password
+      ? await bcrypt.hash(body.user_password, 10)
+      : user.user_password;
+
+    await new sql.Request(transaction)
+      .input("id", sql.Int, id)
+      .input("user_name", sql.NVarChar, body.user_name ?? user.user_name)
+      .input("user_password", sql.NVarChar, hashedPassword)
+      .query(`
+        UPDATE Users
+        SET user_name=@user_name,
+            user_password=@user_password
+        WHERE user_id=@id
+      `);
+
+    // Update Admin or Student
+    if (user_type.toLowerCase() === "admin") {
+      const adminReq = new sql.Request(transaction);
+      const adminUpdate = {
+        first_name: body.first_name ?? null,
+        last_name: body.last_name ?? null,
+        email: body.email ?? null,
+        phone_number: body.phone_number ?? null,
+        department_id: body.department_id ?? null
+      };
+
+      await adminReq
+        .input("id", sql.Int, id)
+        .input("first_name", sql.NVarChar, adminUpdate.first_name)
+        .input("last_name", sql.NVarChar, adminUpdate.last_name)
+        .input("email", sql.NVarChar, adminUpdate.email)
+        .input("phone_number", sql.NVarChar, adminUpdate.phone_number)
+        .input("department_id", sql.Int, adminUpdate.department_id)
+        .query(`
+          UPDATE Admin
+          SET first_name=@first_name,
+              last_name=@last_name,
+              email=@email,
+              phone_number=@phone_number,
+              department_id=@department_id
+          WHERE user_id=@id
+        `);
+    }
+
+    if (user_type.toLowerCase() === "student") {
+      const studentReq = new sql.Request(transaction);
+      const studentUpdate = {
+        first_name: body.first_name ?? null,
+        last_name: body.last_name ?? null,
+        email: body.email ?? null,
+        program: body.program ?? null,
+        year_level: body.year_level ?? null,
+        assigned_by: body.assigned_by ?? null
+      };
+
+      await studentReq
+        .input("id", sql.Int, id)
+        .input("first_name", sql.NVarChar, studentUpdate.first_name)
+        .input("last_name", sql.NVarChar, studentUpdate.last_name)
+        .input("email", sql.NVarChar, studentUpdate.email)
+        .input("program", sql.NVarChar, studentUpdate.program)
+        .input("year_level", sql.Int, studentUpdate.year_level)
+        .input("assigned_by", sql.Int, studentUpdate.assigned_by)
+        .query(`
+          UPDATE Student
+          SET first_name=@first_name,
+              last_name=@last_name,
+              email=@email,
+              program=@program,
+              year_level=@year_level,
+              assigned_by=@assigned_by
+          WHERE user_id=@id
+        `);
+    }
+
+    await transaction.commit();
+    return res.json({ message: "Profile updated successfully" });
+
+  } catch (err) {
+    await transaction.rollback();
+    console.error("patchLoggedInUser:", err);
+    return res.status(500).json({ error: "Failed to update profile", detail: err.message });
   }
 }
 

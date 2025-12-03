@@ -9,6 +9,7 @@ import {
   patchUser,
   deleteUser,
   getLoggedInUserDetails,
+  patchLoggedInUser,
 } from "../controllers/userController.js";
 import { authorizeAdmin, verifyToken } from "../middleware/auth.js";
 
@@ -20,6 +21,8 @@ router.post("/users/login", loginUser);
 
 // Logged-in details
 router.get("/users/me", verifyToken, getLoggedInUserDetails);
+router.patch("/users/me", verifyToken, patchLoggedInUser);
+
 
 // Admin-only Routes
 router.get("/users", verifyToken, authorizeAdmin, getUsers);
