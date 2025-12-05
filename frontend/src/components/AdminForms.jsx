@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Mail,
   Inbox,
@@ -15,94 +15,197 @@ import {
   Archive,
 } from "lucide-react";
 
-const formsData = [
-  {
-    studentName: "Emily Rodriguez",
-    studentId: "SD2025003",
-    program: "Diploma Program",
-    subject: "Payment deadline approaching - unable to access payment portal",
-    message:
-      "Hi, I'm trying to make my payment for the Winter 2025 term but I keep getting an error when I try to access the payment portal. The deadline is tomorrow and I'm worried about my registration being cancelled. Can someone please help me resolve this issue urgently?",
-    status: "Urgent",
-    category: "Payment Issues",
-    date: "3 hours ago",
-    fullDate: "Jan 28, 2025",
-    hasResponse: false,
-  },
-  {
-    studentName: "David Park",
-    studentId: "SD2025004",
-    program: "Post-Diploma Program",
-    subject:
-      "Course schedule conflicts between Web Development and Mobile App courses",
-    message:
-      "Hello, I noticed that the Web Development Advanced course (WEB301) and Mobile App Development (MOB201) both have classes scheduled for Tuesday and Thursday from 2:00-4:00 PM. I need to take both courses to complete my program requirements. Is there any possibility of changing one of the schedules?",
-    status: "Pending",
-    category: "Schedule Conflicts",
-    date: "1 day ago",
-    fullDate: "Jan 27, 2025",
-    hasResponse: false,
-  },
-  {
-    studentName: "Lisa Chen",
-    studentId: "SD2025005",
-    program: "Certificate Program",
-    subject: "Prerequisites for Advanced Database course",
-    message:
-      "Hi there! I'm interested in enrolling in the Advanced Database course for the Spring term. I have some experience with basic SQL from my previous job, but I'm not sure if I meet all the prerequisites. Could you please let me know what the specific requirements are and when registration opens?",
-    status: "New",
-    category: "Course Inquiry",
-    date: "2 days ago",
-    fullDate: "Jan 26, 2025",
-    hasResponse: false,
-  },
-  {
-    studentName: "Marcus Williams",
-    studentId: "SD2025006",
-    program: "Diploma Program",
-    subject: "Unable to register for elective courses",
-    message:
-      "I'm having trouble registering for my elective courses. The system shows that I have completed all the core requirements, but when I try to select electives, it says I don't have permission. Can you help me understand what I might be missing?",
-    status: "Responded",
-    category: "Registration Help",
-    date: "3 days ago",
-    fullDate: "Jan 25, 2025",
-    hasResponse: true,
-    adminResponse: {
-      message:
-        "Hi Marcus, I've reviewed your account and updated your permissions. You should now be able to register for elective courses. Please try again and let us know if you encounter any issues.",
-      date: "2 days ago",
-    },
-  },
+import api from "../services/api";
+
+
+const statsTemplate = [
+  { label: "Total Forms", value: "0", icon: Mail, colors: "text-green-300" },
+  { label: "New Forms", value: "0", icon: Inbox, colors: "text-blue-300" },
+  { label: "Urgent", value: "0", icon: AlertTriangle, colors: "text-red-300" },
+  { label: "Pending Response", value: "0", icon: Clock, colors: "text-yellow-300" },
 ];
 
-const stats = [
-  { label: "Total Forms", value: "47", icon: Mail, colors:"text-green-300" },
-  { label: "New Forms", value: "8", icon: Inbox, colors:"text-blue-300" },
-  { label: "Urgent", value: "3", icon: AlertTriangle, colors:"text-red-300" },
-  { label: "Pending Response", value: "12", icon: Clock, colors:"text-yellow-300" },
-];
+function formatFullDate(dateStr) {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr); 
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  } catch {
+    return "-";
+  }
+}
+
+function timeAgoFromDateOnly(dateStr) {
+  if (!dateStr) return "-";
+  try {
+    const then = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - then;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return `${diffSec} second${diffSec !== 1 ? "s" : ""} ago`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} minute${diffMin !== 1 ? "s" : ""} ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} hour${diffHr !== 1 ? "s" : ""} ago`;
+    const diffDay = Math.floor(diffHr / 24);
+    return `${diffDay} day${diffDay !== 1 ? "s" : ""} ago`;
+  } catch {
+    return "-";
+  }
+}
 
 const SubmittedForms = () => {
+  // filters & search states
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [dateFilter, setDateFilter] = useState("All Time");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredData, setFilteredData] = useState(formsData);
 
-  // Apply filters
+  // data states
+  const [forms, setForms] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  
+  useEffect(() => {
+    let mounted = true;
+    const fetchMessages = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get("/messages");
+        const data = Array.isArray(res.data) ? res.data : [];
+
+        const mapped = data.map((msg) => {
+
+            console.log("submission_date from backend:", msg.submission_date);
+
+          // Student name
+          const first = msg.student_first_name ?? "-";
+          const last = msg.student_last_name ?? "-";
+          const studentName = (first === "-" && last === "-") ? "-" : `${first} ${last}`.trim();
+
+
+          // IDs & program
+          const studentId = msg.student_id ? String(msg.student_id) : "-";
+          const program = msg.program ?? "-";
+
+          // Subject & message
+          const subject = msg.subject ?? "-";
+          const message = msg.issue_description ?? "-";
+
+          // Status & category
+          const status = msg.status ?? "-";
+          const category = msg.priority ?? "-";
+
+          // Dates (submission_date is date-only)
+          const submission_date = msg.submission_date ?? null;
+          const date = submission_date ? timeAgoFromDateOnly(submission_date) : "-";
+          const fullDate = submission_date ? formatFullDate(submission_date) : "-";
+
+          // Admin response
+          const hasResponse = Boolean(msg.admin_response);
+          const adminResponse = hasResponse
+            ? {
+                message: msg.admin_response ?? "-",
+                date: msg.response_date ? formatFullDate(msg.response_date) : "-",
+              }
+            : null;
+
+          return {
+            studentName,
+            studentId,
+            program,
+            subject,
+            message,
+            status,
+            category,
+            date,
+            fullDate,
+            hasResponse,
+            adminResponse,
+          };
+        });
+
+        if (mounted) {
+          setForms(mapped);
+          setFilteredData(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load messages:", err);
+        if (mounted) {
+          setError("Failed to load messages.");
+          setForms([]); 
+          setFilteredData([]);
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchMessages();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // compute stats from live forms
+  const computedStats = useMemo(() => {
+    const total = forms.length;
+    const newForms = forms.filter((f) => (f.status ?? "").toLowerCase() === "new").length;
+    const urgent = forms.filter((f) => (f.status ?? "").toLowerCase() === "urgent").length;
+    const pendingResponse = forms.filter((f) => {
+      const s = (f.status ?? "").toLowerCase();
+      return s === "pending" || !f.hasResponse;
+    }).length;
+
+    return [
+      { ...statsTemplate[0], value: String(total) },
+      { ...statsTemplate[1], value: String(newForms) },
+      { ...statsTemplate[2], value: String(urgent) },
+      { ...statsTemplate[3], value: String(pendingResponse) },
+    ];
+  }, [forms]);
+
+  // Apply filters (status, category, search, date range)
   const applyFilters = () => {
-    let filtered = formsData.filter((form) => {
-      const matchesStatus =
-        statusFilter === "All Status" || form.status === statusFilter;
-      const matchesCategory =
-        categoryFilter === "All Categories" || form.category === categoryFilter;
-      const matchesSearch =
-        form.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        form.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        form.message.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery ?? "").toLowerCase().trim();
+    const base = forms ?? [];
 
-      return matchesStatus && matchesCategory && matchesSearch;
+    const filtered = base.filter((form) => {
+      const matchesStatus =
+        statusFilter === "All Status" || (form.status ?? "") === statusFilter;
+
+      const matchesCategory =
+        categoryFilter === "All Categories" || (form.category ?? "") === categoryFilter;
+
+      const matchesSearch =
+        q === "" ||
+        (form.studentName ?? "").toLowerCase().includes(q) ||
+        (form.subject ?? "").toLowerCase().includes(q) ||
+        (form.message ?? "").toLowerCase().includes(q);
+
+      // Date filter basic handling (All Time / Today / Last 7 days / Last 30 days)
+      let matchesDate = true;
+      if (dateFilter && dateFilter !== "All Time" && form.submission_date) {
+        try {
+          const submission = new Date(form.submission_date + "T00:00:00"); // use backend date
+          const now = new Date();
+          if (dateFilter === "Today") {
+            matchesDate = submission.toDateString() === now.toDateString();
+          } else if (dateFilter === "Last 7 days") {
+            matchesDate = (now - submission) / (1000 * 60 * 60 * 24) <= 7;
+          } else if (dateFilter === "Last 30 days") {
+            matchesDate = (now - submission) / (1000 * 60 * 60 * 24) <= 30;
+          }
+        } catch {
+          matchesDate = true;
+        }
+      }
+
+      return matchesStatus && matchesCategory && matchesSearch && matchesDate;
     });
 
     setFilteredData(filtered);
@@ -113,7 +216,7 @@ const SubmittedForms = () => {
     setCategoryFilter("All Categories");
     setDateFilter("All Time");
     setSearchQuery("");
-    setFilteredData(formsData);
+    setFilteredData(forms);
   };
 
   return (
@@ -224,7 +327,7 @@ const SubmittedForms = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-        {stats.map((stat, idx) => {
+        {computedStats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <div
@@ -235,9 +338,7 @@ const SubmittedForms = () => {
                 <p className="text-sm text-gray-600">{stat.label}</p>
                 <Icon size={20} className={stat.colors} />
               </div>
-              <p className="text-3xl font-semibold text-gray-900">
-                {stat.value}
-              </p>
+              <p className="text-3xl font-semibold text-gray-900">{stat.value}</p>
             </div>
           );
         })}
@@ -261,17 +362,14 @@ const SubmittedForms = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {/* Avatar */}
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-10 h-10" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="14" r="6" fill="#000" />
-                    <path
-                      d="M12 28 Q12 22 20 22 Q28 22 28 28"
-                      stroke="#000"
-                      strokeWidth="1.5"
-                      fill="none"
-                    />
-                    <circle cx="16" cy="14" r="1" fill="#fff" />
-                    <circle cx="24" cy="14" r="1" fill="#fff" />
-                  </svg>
+                  <span className="text-lg font-bold uppercase">
+                    {form.studentName && form.studentName !== "-"
+                      ? form.studentName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                      : "-"}
+                  </span>
                 </div>
 
                 {/* Info */}
@@ -340,7 +438,7 @@ const SubmittedForms = () => {
 
           {filteredData.length === 0 && (
             <div className="text-center py-10 text-gray-500">
-              No forms match your filters or search.
+              {loading ? "Loading..." : error ?? "No forms match your filters or search."}
             </div>
           )}
         </div>

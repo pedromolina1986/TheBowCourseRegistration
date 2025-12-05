@@ -9,7 +9,7 @@ import {
   MoreVertical,
 } from "lucide-react";
 
-import api from "../services/api.js"; // your axios instance
+import api from "../services/api.js";
 
 const stats = [
   { label: "Total Students", value: "156", icon: Users, colors: "text-blue-300" },
@@ -33,7 +33,7 @@ const RegisteredStudents = () => {
     const fetchUsers = async () => {
       try {
         const response = await api.get("/users");
-        setUsers(response.data); // store all users
+        setUsers(response.data);
       } catch (error) {
         console.error("Failed to fetch users:", error);
       } finally {
