@@ -1,8 +1,26 @@
 /*
 Controller for User CRUD + Auth (SQL Server, parameterized)
-Schema: Users(user_id INT PK, user_name, user_password, user_type)
+Schema:
+  Users(user_id INT PK, user_name, user_password, user_type)
+  Student(
+    student_id INT PK,
+    user_id INT FK,
+    first_name NVARCHAR,
+    last_name NVARCHAR,
+    email NVARCHAR,
+    program NVARCHAR,
+    year_level INT NULL,
+    assigned_by INT NULL,
+    phone NVARCHAR(50) NULL,
+    street NVARCHAR(255) NULL,
+    city NVARCHAR(100) NULL,
+    province NVARCHAR(100) NULL,
+    postal_code NVARCHAR(20) NULL,
+    start_date DATE NULL
+  )
 DB: TheBowCourse
 */
+
 import sql from "mssql";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -14,11 +32,9 @@ async function getPool() {
   return sql.connect(config);
 }
 
-/* ========= AUTH ========= */
+/* ========= AUTH + REGISTRATION ========= */
 
 // POST /api/v1/users/register
-
-/* ========= AUTH + STUDENT REGISTRATION ========= */
 export async function registerUser(req, res) {
   const {
     user_name,
@@ -27,24 +43,26 @@ export async function registerUser(req, res) {
     first_name,
     last_name,
     email,
-    phone_number,
-    department_id,
-    program,
-    year_level,
-    assigned_by
+    phone_number, // admin
+    department_id, // admin
+    program, // student
+    year_level, // student
+    assigned_by, // student
   } = req.body;
 
-  // Basic validations
   if (!user_name || !user_password || !user_type) {
-    return res.status(400).json({ error: "user_name, user_password, user_type are required" });
+    return res
+      .status(400)
+      .json({ error: "user_name, user_password, user_type are required" });
   }
 
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
 
   try {
-    //Check username uniqueness
-    const existingUser = await pool.request()
+    // Check username uniqueness
+    const existingUser = await pool
+      .request()
       .input("user_name", sql.NVarChar, user_name)
       .query("SELECT user_id FROM Users WHERE user_name = @user_name");
 
@@ -52,19 +70,31 @@ export async function registerUser(req, res) {
       return res.status(400).json({ error: "Username already exists" });
     }
 
-    //Validate required fields for student/admin
-    if (user_type.toLowerCase() === "student" && (!first_name || !last_name || !email || !assigned_by)) {
-      return res.status(400).json({ error: "first_name, last_name, email, assigned_by are required for students" });
+    // Validate required fields
+    if (
+      user_type.toLowerCase() === "student" &&
+      (!first_name || !last_name || !email || !assigned_by)
+    ) {
+      return res.status(400).json({
+        error:
+          "first_name, last_name, email, assigned_by are required for students",
+      });
     }
-    if (user_type.toLowerCase() === "admin" && (!first_name || !last_name || !email || !department_id)) {
-      return res.status(400).json({ error: "first_name, last_name, email, department_id are required for admins" });
+
+    if (
+      user_type.toLowerCase() === "admin" &&
+      (!first_name || !last_name || !email || !department_id)
+    ) {
+      return res.status(400).json({
+        error:
+          "first_name, last_name, email, department_id are required for admins",
+      });
     }
 
     await transaction.begin();
-
     const request = new sql.Request(transaction);
 
-    //Insert into Users
+    // Insert into Users
     const hashedPassword = await bcrypt.hash(user_password, 10);
     const userResult = await request
       .input("user_name", sql.NVarChar, user_name)
@@ -83,7 +113,6 @@ export async function registerUser(req, res) {
     let newStudent = null;
     let newAdmin = null;
 
-    //Insert into Student/Admin depending on user_type
     if (user_type.toLowerCase() === "student") {
       const studentResult = await request
         .input("user_id", sql.Int, newUser.id)
@@ -94,7 +123,9 @@ export async function registerUser(req, res) {
         .input("year_level", sql.Int, year_level || null)
         .input("assigned_by", sql.Int, assigned_by)
         .query(`
-          INSERT INTO Student (user_id, first_name, last_name, email, program, year_level, assigned_by)
+          INSERT INTO Student (
+            user_id, first_name, last_name, email, program, year_level, assigned_by
+          )
           OUTPUT INSERTED.student_id AS student_id,
                  INSERTED.user_id AS user_id,
                  INSERTED.first_name,
@@ -130,31 +161,33 @@ export async function registerUser(req, res) {
 
     await transaction.commit();
 
-    //Return combined info
     return res.status(201).json({
       user: newUser,
       student: newStudent,
-      admin: newAdmin
+      admin: newAdmin,
     });
-
   } catch (err) {
     console.error("registerUser:", err);
-    await transaction.rollback();
+    try {
+      await transaction.rollback();
+    } catch {}
     return res.status(500).json({ error: "Failed to register user" });
   }
 }
-
 
 // POST /api/v1/users/login
 export async function loginUser(req, res) {
   try {
     const { user_name, user_password } = req.body;
     if (!user_name || !user_password) {
-      return res.status(400).json({ error: "user_name and user_password are required" });
+      return res
+        .status(400)
+        .json({ error: "user_name and user_password are required" });
     }
 
     const pool = await getPool();
-    const result = await pool.request()
+    const result = await pool
+      .request()
       .input("user_name", sql.NVarChar, user_name)
       .query(`
         SELECT TOP 1 user_id AS id, user_name, user_password, user_type
@@ -165,8 +198,12 @@ export async function loginUser(req, res) {
     const user = result.recordset[0];
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-    const validPassword = await bcrypt.compare(user_password, user.user_password);
-    if (!validPassword) return res.status(401).json({ error: "Invalid credentials" });
+    const validPassword = await bcrypt.compare(
+      user_password,
+      user.user_password
+    );
+    if (!validPassword)
+      return res.status(401).json({ error: "Invalid credentials" });
 
     const token = jwt.sign(
       { id: user.id, user_type: user.user_type },
@@ -176,9 +213,12 @@ export async function loginUser(req, res) {
 
     return res.json({
       token,
-      user: { id: user.id, user_name: user.user_name, user_type: user.user_type }
+      user: {
+        id: user.id,
+        user_name: user.user_name,
+        user_type: user.user_type,
+      },
     });
-
   } catch (err) {
     console.error("loginUser:", err);
     return res.status(500).json({ error: "Login failed" });
@@ -192,33 +232,37 @@ export async function getUsers(req, res) {
   try {
     const pool = await getPool();
 
-    const result = await pool.request()
-      .query(`
-        SELECT 
-          u.user_id AS id,
-          u.user_name,
-          u.user_type,
-          s.student_id,
-          s.first_name AS student_first_name,
-          s.last_name AS student_last_name,
-          s.email AS student_email,
-          s.program,
-          s.year_level,
-          s.assigned_by,
-          a.admin_id,
-          a.first_name AS admin_first_name,
-          a.last_name AS admin_last_name,
-          a.email AS admin_email,
-          a.phone_number,
-          a.department_id
-        FROM Users u
-        LEFT JOIN Student s ON u.user_id = s.user_id
-        LEFT JOIN Admin a ON u.user_id = a.user_id
-        ORDER BY u.user_id DESC
-      `);
+    const result = await pool.request().query(`
+      SELECT 
+        u.user_id AS id,
+        u.user_name,
+        u.user_type,
+        s.student_id,
+        s.first_name AS student_first_name,
+        s.last_name AS student_last_name,
+        s.email AS student_email,
+        s.program,
+        s.year_level,
+        s.assigned_by,
+        s.phone,
+        s.street,
+        s.city,
+        s.province,
+        s.postal_code,
+        s.start_date,
+        a.admin_id,
+        a.first_name AS admin_first_name,
+        a.last_name AS admin_last_name,
+        a.email AS admin_email,
+        a.phone_number,
+        a.department_id
+      FROM Users u
+      LEFT JOIN Student s ON u.user_id = s.user_id
+      LEFT JOIN Admin a ON u.user_id = a.user_id
+      ORDER BY u.user_id DESC
+    `);
 
-    // Map result to include only relevant details
-    const users = result.recordset.map(u => {
+    const users = result.recordset.map((u) => {
       let details = null;
       if (u.user_type.toLowerCase() === "student") {
         details = {
@@ -228,7 +272,13 @@ export async function getUsers(req, res) {
           email: u.student_email,
           program: u.program,
           year_level: u.year_level,
-          assigned_by: u.assigned_by
+          assigned_by: u.assigned_by,
+          phone: u.phone,
+          street: u.street,
+          city: u.city,
+          province: u.province,
+          postal_code: u.postal_code,
+          start_date: u.start_date,
         };
       } else if (u.user_type.toLowerCase() === "admin") {
         details = {
@@ -237,7 +287,7 @@ export async function getUsers(req, res) {
           last_name: u.admin_last_name,
           email: u.admin_email,
           phone_number: u.phone_number,
-          department_id: u.department_id
+          department_id: u.department_id,
         };
       }
 
@@ -245,16 +295,15 @@ export async function getUsers(req, res) {
         id: u.id,
         user_name: u.user_name,
         user_type: u.user_type,
-        details
+        details,
       };
     });
 
     return res.json(users);
-
   } catch (err) {
     console.error("getUsers:", err);
     return res.status(500).json({ error: "Failed to retrieve users" });
-  } 
+  }
 }
 
 // GET /api/v1/users/:id
@@ -267,8 +316,8 @@ export async function getUserById(req, res) {
   try {
     const pool = await getPool();
 
-    // Check base user
-    const userQuery = await pool.request()
+    const userQuery = await pool
+      .request()
       .input("id", sql.Int, id)
       .query(`
         SELECT 
@@ -285,7 +334,8 @@ export async function getUserById(req, res) {
     let details = null;
 
     if (user.user_type.toLowerCase() === "student") {
-      const studentQuery = await pool.request()
+      const studentQuery = await pool
+        .request()
         .input("id", sql.Int, id)
         .query(`
           SELECT 
@@ -296,7 +346,13 @@ export async function getUserById(req, res) {
             email,
             program,
             year_level,
-            assigned_by
+            assigned_by,
+            phone,
+            street,
+            city,
+            province,
+            postal_code,
+            start_date
           FROM Student
           WHERE user_id = @id
         `);
@@ -304,7 +360,8 @@ export async function getUserById(req, res) {
     }
 
     if (user.user_type.toLowerCase() === "admin") {
-      const adminQuery = await pool.request()
+      const adminQuery = await pool
+        .request()
         .input("id", sql.Int, id)
         .query(`
           SELECT 
@@ -323,23 +380,23 @@ export async function getUserById(req, res) {
 
     return res.json({
       user,
-      details
+      details,
     });
-
   } catch (err) {
-    console.error("getUserFullDetails:", err);
+    console.error("getUserById:", err);
     return res.status(500).json({ error: "Failed to retrieve user details" });
   }
 }
 
-// GET /api/v1/me
+// GET /api/v1/users/me
 export async function getLoggedInUserDetails(req, res) {
-  const { id, user_type } = req.user; // extracted from token
+  const { id, user_type } = req.user;
 
   try {
     const pool = await getPool();
 
-    const userQuery = await pool.request()
+    const userQuery = await pool
+      .request()
       .input("id", sql.Int, id)
       .query(`
         SELECT 
@@ -351,7 +408,6 @@ export async function getLoggedInUserDetails(req, res) {
       `);
 
     const user = userQuery.recordset[0];
-
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -359,7 +415,8 @@ export async function getLoggedInUserDetails(req, res) {
     let details = null;
 
     if (user_type.toLowerCase() === "student") {
-      const studentQuery = await pool.request()
+      const studentQuery = await pool
+        .request()
         .input("id", sql.Int, id)
         .query(`
           SELECT 
@@ -370,7 +427,13 @@ export async function getLoggedInUserDetails(req, res) {
             email,
             program,
             year_level,
-            assigned_by
+            assigned_by,
+            phone,
+            street,
+            city,
+            province,
+            postal_code,
+            start_date
           FROM Student
           WHERE user_id = @id
         `);
@@ -378,7 +441,8 @@ export async function getLoggedInUserDetails(req, res) {
     }
 
     if (user_type.toLowerCase() === "admin") {
-      const adminQuery = await pool.request()
+      const adminQuery = await pool
+        .request()
         .input("id", sql.Int, id)
         .query(`
           SELECT 
@@ -400,14 +464,12 @@ export async function getLoggedInUserDetails(req, res) {
       details = adminQuery.recordset[0] || null;
     }
 
-    return res.json({
-      user,
-      details
-    });
-
+    return res.json({ user, details });
   } catch (err) {
     console.error("getLoggedInUserDetails:", err);
-    return res.status(500).json({ error: "Failed to retrieve user details" });
+    return res
+      .status(500)
+      .json({ error: "Failed to retrieve user details" });
   }
 }
 
@@ -419,12 +481,34 @@ export async function patchLoggedInUser(req, res) {
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
 
+  // Helpers to merge values safely
+  const mergeText = (bodyObj, row, field) => {
+    if (bodyObj[field] === undefined) return row[field] ?? null;
+    if (bodyObj[field] === "") return null;
+    return bodyObj[field];
+  };
+
+  const mergeInt = (bodyObj, row, field) => {
+    if (bodyObj[field] === undefined) return row[field] ?? null;
+    if (bodyObj[field] === "" || bodyObj[field] === null) return null;
+    const n = Number(bodyObj[field]);
+    if (Number.isNaN(n)) return row[field] ?? null;
+    return n;
+  };
+
+  const mergeDate = (bodyObj, row, field) => {
+    if (bodyObj[field] === undefined) return row[field] ?? null;
+    if (bodyObj[field] === "" || bodyObj[field] === null) return null;
+    // Coming from frontend as "YYYY-MM-DD"
+    return bodyObj[field];
+  };
+
   try {
     await transaction.begin();
 
-    // Fetch user from Users table
-    const request = new sql.Request(transaction);
-    const userResult = await request
+    // ---------- USERS TABLE ----------
+    const userReq = new sql.Request(transaction);
+    const userResult = await userReq
       .input("id", sql.Int, id)
       .query("SELECT * FROM Users WHERE user_id=@id");
 
@@ -434,15 +518,18 @@ export async function patchLoggedInUser(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Update Users table
-    const hashedPassword = body.user_password
-      ? await bcrypt.hash(body.user_password, 10)
-      : user.user_password;
+    const newUserName =
+      body.user_name !== undefined ? body.user_name : user.user_name;
+
+    let newPassword = user.user_password;
+    if (body.user_password && body.user_password.trim() !== "") {
+      newPassword = await bcrypt.hash(body.user_password, 10);
+    }
 
     await new sql.Request(transaction)
       .input("id", sql.Int, id)
-      .input("user_name", sql.NVarChar, body.user_name ?? user.user_name)
-      .input("user_password", sql.NVarChar, hashedPassword)
+      .input("user_name", sql.NVarChar, newUserName)
+      .input("user_password", sql.NVarChar, newPassword)
       .query(`
         UPDATE Users
         SET user_name=@user_name,
@@ -450,18 +537,25 @@ export async function patchLoggedInUser(req, res) {
         WHERE user_id=@id
       `);
 
-    // Update Admin or Student
+    // ---------- ADMIN PROFILE ----------
     if (user_type.toLowerCase() === "admin") {
-      const adminReq = new sql.Request(transaction);
+      const adminSelectReq = new sql.Request(transaction);
+      const adminCurrent = await adminSelectReq
+        .input("id", sql.Int, id)
+        .query("SELECT * FROM Admin WHERE user_id=@id");
+
+      const adminRow = adminCurrent.recordset[0] || {};
+
       const adminUpdate = {
-        first_name: body.first_name ?? null,
-        last_name: body.last_name ?? null,
-        email: body.email ?? null,
-        phone_number: body.phone_number ?? null,
-        department_id: body.department_id ?? null
+        first_name: mergeText(body, adminRow, "first_name"),
+        last_name: mergeText(body, adminRow, "last_name"),
+        email: mergeText(body, adminRow, "email"),
+        phone_number: mergeText(body, adminRow, "phone_number"),
+        department_id: mergeInt(body, adminRow, "department_id"),
       };
 
-      await adminReq
+      const adminUpdateReq = new sql.Request(transaction);
+      await adminUpdateReq
         .input("id", sql.Int, id)
         .input("first_name", sql.NVarChar, adminUpdate.first_name)
         .input("last_name", sql.NVarChar, adminUpdate.last_name)
@@ -479,18 +573,32 @@ export async function patchLoggedInUser(req, res) {
         `);
     }
 
+    // ---------- STUDENT PROFILE ----------
     if (user_type.toLowerCase() === "student") {
-      const studentReq = new sql.Request(transaction);
+      const studentSelectReq = new sql.Request(transaction);
+      const studentCurrent = await studentSelectReq
+        .input("id", sql.Int, id)
+        .query("SELECT * FROM Student WHERE user_id=@id");
+
+      const studentRow = studentCurrent.recordset[0] || {};
+
       const studentUpdate = {
-        first_name: body.first_name ?? null,
-        last_name: body.last_name ?? null,
-        email: body.email ?? null,
-        program: body.program ?? null,
-        year_level: body.year_level ?? null,
-        assigned_by: body.assigned_by ?? null
+        first_name: mergeText(body, studentRow, "first_name"),
+        last_name: mergeText(body, studentRow, "last_name"),
+        email: mergeText(body, studentRow, "email"),
+        program: mergeText(body, studentRow, "program"),
+        year_level: mergeInt(body, studentRow, "year_level"),
+        assigned_by: mergeInt(body, studentRow, "assigned_by"),
+        phone: mergeText(body, studentRow, "phone"),
+        street: mergeText(body, studentRow, "street"),
+        city: mergeText(body, studentRow, "city"),
+        province: mergeText(body, studentRow, "province"),
+        postal_code: mergeText(body, studentRow, "postal_code"),
+        start_date: mergeDate(body, studentRow, "start_date"),
       };
 
-      await studentReq
+      const studentUpdateReq = new sql.Request(transaction);
+      await studentUpdateReq
         .input("id", sql.Int, id)
         .input("first_name", sql.NVarChar, studentUpdate.first_name)
         .input("last_name", sql.NVarChar, studentUpdate.last_name)
@@ -498,6 +606,12 @@ export async function patchLoggedInUser(req, res) {
         .input("program", sql.NVarChar, studentUpdate.program)
         .input("year_level", sql.Int, studentUpdate.year_level)
         .input("assigned_by", sql.Int, studentUpdate.assigned_by)
+        .input("phone", sql.NVarChar, studentUpdate.phone)
+        .input("street", sql.NVarChar, studentUpdate.street)
+        .input("city", sql.NVarChar, studentUpdate.city)
+        .input("province", sql.NVarChar, studentUpdate.province)
+        .input("postal_code", sql.NVarChar, studentUpdate.postal_code)
+        .input("start_date", sql.Date, studentUpdate.start_date)
         .query(`
           UPDATE Student
           SET first_name=@first_name,
@@ -505,22 +619,32 @@ export async function patchLoggedInUser(req, res) {
               email=@email,
               program=@program,
               year_level=@year_level,
-              assigned_by=@assigned_by
+              assigned_by=@assigned_by,
+              phone=@phone,
+              street=@street,
+              city=@city,
+              province=@province,
+              postal_code=@postal_code,
+              start_date=@start_date
           WHERE user_id=@id
         `);
     }
 
     await transaction.commit();
     return res.json({ message: "Profile updated successfully" });
-
   } catch (err) {
-    await transaction.rollback();
+    try {
+      await transaction.rollback();
+    } catch {}
     console.error("patchLoggedInUser:", err);
-    return res.status(500).json({ error: "Failed to update profile", detail: err.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to update profile", detail: err.message });
   }
 }
 
 
+/* ========= Remaining CRUD for admins ========= */
 
 // POST /api/v1/users (admin create)
 export async function createUser(req, res) {
@@ -535,19 +659,21 @@ export async function createUser(req, res) {
     department_id,
     program,
     year_level,
-    assigned_by
+    assigned_by,
   } = req.body;
 
   if (!user_name || !user_password || !user_type) {
-    return res.status(400).json({ error: "user_name, user_password, user_type are required" });
+    return res
+      .status(400)
+      .json({ error: "user_name, user_password, user_type are required" });
   }
 
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
 
   try {
-    // Check username uniqueness
-    const exists = await pool.request()
+    const exists = await pool
+      .request()
       .input("user_name", sql.NVarChar, user_name)
       .query("SELECT user_id FROM Users WHERE user_name=@user_name");
 
@@ -558,7 +684,6 @@ export async function createUser(req, res) {
     await transaction.begin();
     const request = new sql.Request(transaction);
 
-    // Insert user
     const hashed = await bcrypt.hash(user_password, 10);
     const insertedUser = await request
       .input("user_name", sql.NVarChar, user_name)
@@ -615,21 +740,22 @@ export async function createUser(req, res) {
 
     return res.status(201).json({
       user: newUser,
-      detail
+      detail,
     });
-
   } catch (err) {
     console.error("createUser:", err);
-    await transaction.rollback();
+    try {
+      await transaction.rollback();
+    } catch {}
     return res.status(500).json({ error: "Failed to create user" });
   }
 }
 
-
 // PUT /api/v1/users/:id
 export async function updateUser(req, res) {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (Number.isNaN(id))
+    return res.status(400).json({ error: "Invalid id" });
 
   const {
     user_name,
@@ -642,7 +768,7 @@ export async function updateUser(req, res) {
     department_id,
     program,
     year_level,
-    assigned_by
+    assigned_by,
   } = req.body;
 
   const pool = await getPool();
@@ -654,7 +780,6 @@ export async function updateUser(req, res) {
 
     const hashed = user_password ? await bcrypt.hash(user_password, 10) : null;
 
-    //Update users table
     await request
       .input("id", sql.Int, id)
       .input("user_name", sql.NVarChar, user_name)
@@ -666,7 +791,6 @@ export async function updateUser(req, res) {
         WHERE user_id=@id
       `);
 
-    //Update linked record
     if (user_type.toLowerCase() === "student") {
       await request
         .input("id", id)
@@ -709,19 +833,20 @@ export async function updateUser(req, res) {
 
     await transaction.commit();
     return res.json({ message: "User updated" });
-
   } catch (err) {
-    await transaction.rollback();
     console.error("updateUser:", err);
+    try {
+      await transaction.rollback();
+    } catch {}
     return res.status(500).json({ error: "Failed to update user" });
   }
 }
 
-
 // PATCH /api/v1/users/:id
 export async function patchUser(req, res) {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (Number.isNaN(id))
+    return res.status(400).json({ error: "Invalid id" });
 
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
@@ -737,11 +862,7 @@ export async function patchUser(req, res) {
     const user = userResult.recordset[0];
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    const {
-      user_name,
-      user_password,
-      user_type
-    } = req.body;
+    const { user_name, user_password, user_type } = req.body;
 
     const updatedName = user_name ?? user.user_name;
     const updatedPass = user_password
@@ -749,7 +870,6 @@ export async function patchUser(req, res) {
       : user.user_password;
     const updatedType = user_type ?? user.user_type;
 
-    //Update Users table
     await request
       .input("id", id)
       .input("user_name", updatedName)
@@ -757,26 +877,28 @@ export async function patchUser(req, res) {
       .input("user_type", updatedType)
       .query(`
         UPDATE Users SET 
-        user_name=@user_name, 
-        user_password=@user_password,
-        user_type=@user_type
+          user_name=@user_name, 
+          user_password=@user_password,
+          user_type=@user_type
         WHERE user_id=@id
       `);
 
     await transaction.commit();
     return res.json({ message: "User patched" });
-
   } catch (err) {
-    await transaction.rollback();
     console.error("patchUser:", err);
+    try {
+      await transaction.rollback();
+    } catch {}
     return res.status(500).json({ error: "Failed to patch user" });
   }
 }
 
-//DELETE /api/v1/users/:id
+// DELETE /api/v1/users/:id
 export async function deleteUser(req, res) {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  if (Number.isNaN(id))
+    return res.status(400).json({ error: "Invalid id" });
 
   const pool = await getPool();
   const transaction = new sql.Transaction(pool);
@@ -784,7 +906,6 @@ export async function deleteUser(req, res) {
   try {
     await transaction.begin();
 
-    //Check user exists
     const userCheck = await new sql.Request(transaction)
       .input("id", sql.Int, id)
       .query("SELECT user_id FROM Users WHERE user_id = @id");
@@ -794,7 +915,6 @@ export async function deleteUser(req, res) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    //Delete child records
     await new sql.Request(transaction)
       .input("id", sql.Int, id)
       .query("DELETE FROM Student WHERE user_id = @id");
@@ -803,24 +923,29 @@ export async function deleteUser(req, res) {
       .input("id", sql.Int, id)
       .query("DELETE FROM Admin WHERE user_id = @id");
 
-    //Delete user
     const result = await new sql.Request(transaction)
       .input("id", sql.Int, id)
-      .query("DELETE FROM Users WHERE user_id = @id; SELECT @@ROWCOUNT AS affected;");
+      .query(
+        "DELETE FROM Users WHERE user_id = @id; SELECT @@ROWCOUNT AS affected;"
+      );
 
     if (!result.recordset[0]?.affected) {
       await transaction.rollback();
-      return res.status(404).json({ error: "User not found when deleting" });
+      return res
+        .status(404)
+        .json({ error: "User not found when deleting" });
     }
 
     await transaction.commit();
     return res.json({ message: "User deleted successfully" });
-
   } catch (err) {
-    try { await transaction.rollback(); } catch {}
+    try {
+      await transaction.rollback();
+    } catch {}
     console.error("deleteUser error:", err);
-    return res.status(500).json({ error: "Failed to delete user", detail: err.message });
+    return res.status(500).json({
+      error: "Failed to delete user",
+      detail: err.message,
+    });
   }
 }
-
-
