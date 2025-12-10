@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+// src/components/StudentCourseRegistration.jsx
+import React, { useState, useEffect } from "react";
 import { FaSearch, FaFilter, FaUserCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api.js";
 
 const StudentCourseRegistration = () => {
   const navigate = useNavigate();
@@ -8,6 +10,8 @@ const StudentCourseRegistration = () => {
   const [search, setSearch] = useState("");
 
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Filters state
   const [levelFilter, setLevelFilter] = useState({
@@ -27,113 +31,66 @@ const StudentCourseRegistration = () => {
   });
   const [termFilter, setTermFilter] = useState({
     "Winter 2025": false,
-    "Summer 2025" : false,
+    "Summer 2025": false,
     "Spring 2025": false,
-    "Fall 2025" : false,
-    
+    "Fall 2025": false,
   });
 
   // Temporary filters for modal
   const [tempLevelFilter, setTempLevelFilter] = useState({ ...levelFilter });
   const [tempTypeFilter, setTempTypeFilter] = useState({ ...typeFilter });
-  const [tempCreditsFilter, setTempCreditsFilter] = useState({ ...creditsFilter });
+  const [tempCreditsFilter, setTempCreditsFilter] = useState({
+    ...creditsFilter,
+  });
   const [tempTermFilter, setTempTermFilter] = useState({ ...termFilter });
 
-  // Courses with term included
-  const [courses, setCourses] = useState([
-    {
-      code: "SDEV101",
-      title: "Programming Fundamentals",
-      credits: 3,
-      term: "Winter 2025",
-      price: 1000,
-      description:
-        "Introduction to programming concepts using modern programming languages. Students will learn variables, data types, control structures, and basic algorithms.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 9:00–10:30 AM",
-      instructor: "Dr. Sarah Johnson",
-      availableSeats: 12,
-      totalSeats: 25,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV102",
-      title: "Database Design",
-      credits: 3,
-      term: "Winter 2025",
-      price: 1200,
-      description:
-        "Comprehensive study of database design principles, normalization, SQL, and database management systems.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 2:00–3:30 PM",
-      instructor: "Prof. Michael Chen",
-      availableSeats: 8,
-      totalSeats: 20,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV103",
-      title: "Web Development Fundamentals",
-      credits: 4,
-      term: "Spring 2025",
-      price: 1500,
-      description:
-        "Introduction to web development technologies including HTML, CSS, JavaScript, and modern frameworks.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 11:00–12:30 PM",
-      instructor: "Ms. Emily Rodriguez",
-      availableSeats: 15,
-      totalSeats: 22,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV104",
-      title: "Software Security",
-      credits: 3,
-      term: "Winter 2025",
-      price: 1300,
-      description:
-        "Study of software security principles, vulnerabilities, and testing methodologies.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 9:00–12:00 PM",
-      instructor: "Dr. James Wilson",
-      availableSeats: 6,
-      totalSeats: 18,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV105",
-      title: "Object-Oriented Programming",
-      credits: 4,
-      term: "Spring 2025",
-      price: 1400,
-      description:
-        "Advanced programming concepts including classes, objects, inheritance, and design patterns using Java and C#.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 11:00–1:00 PM",
-      instructor: "Dr. Sarah Johnson",
-      availableSeats: 0,
-      totalSeats: 20,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV106",
-      title: "Systems Analysis & Design",
-      credits: 3,
-      term: "Winter 2025",
-      price: 1100,
-      description:
-        "Methodologies for analyzing, designing, and implementing information systems. Focus on requirements gathering and system modeling.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 2:00–3:00 PM",
-      instructor: "Prof. Michael Chen",
-      availableSeats: 10,
-      totalSeats: 16,
-      level: "First Year",
-      type: "Core",
-    },
-  ]);
+  // Courses from backend
+  const [courses, setCourses] = useState([]);
 
-  // Add/Remove course from cart and update availableSeats
+  // 🔹 Fetch courses from backend
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await api.get("/courses"); // GET /api/v1/courses
+        const data = res.data || [];
+
+        // Map backend fields → frontend shape
+        const mapped = data.map((c) => ({
+          code: c.course_code,
+          title: c.course_name,
+          credits: c.credit_hours ?? 0,
+          term: c.term_name || "TBD Term",
+          // you can later format dates nicely instead of raw
+          schedule:
+            c.start_date && c.end_date
+              ? `${c.start_date} – ${c.end_date}`
+              : "Schedule TBA",
+          description: c.description || "",
+          instructor: c.instructor || "TBA",
+          // we don’t have available seats in DB,
+          // so for now we use capacity as both total + available
+          availableSeats: c.capacity ?? 0,
+          totalSeats: c.capacity ?? 0,
+          level: "First Year", // placeholder until you add field in DB
+          type: "Core", // placeholder
+          price: 0, // not in DB yet
+        }));
+
+        setCourses(mapped);
+      } catch (err) {
+        console.error("Error loading courses:", err);
+        setError("Failed to load courses");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // 🔹 Add/Remove course from cart (frontend only, not DB)
   const toggleCourse = (course) => {
     const isSelected = selectedCourses.find((c) => c.code === course.code);
     if (isSelected) {
@@ -158,7 +115,7 @@ const StudentCourseRegistration = () => {
     }
   };
 
-  // Apply filters from modal
+  // 🔹 Apply filters from modal
   const applyFilters = () => {
     setLevelFilter({ ...tempLevelFilter });
     setTypeFilter({ ...tempTypeFilter });
@@ -167,7 +124,7 @@ const StudentCourseRegistration = () => {
     setFilterModalOpen(false);
   };
 
-  // Filter courses
+  // 🔹 Filter courses client-side
   const filteredCourses = courses.filter((course) => {
     const levelSelected = Object.values(levelFilter).some((v) => v);
     const typeSelected = Object.values(typeFilter).some((v) => v);
@@ -176,7 +133,9 @@ const StudentCourseRegistration = () => {
 
     const levelMatch = levelSelected ? levelFilter[course.level] : true;
     const typeMatch = typeSelected ? typeFilter[course.type] : true;
-    const creditsMatch = creditsSelected ? creditsFilter[course.credits] : true;
+    const creditsMatch = creditsSelected
+      ? creditsFilter[course.credits]
+      : true;
     const termMatch = termSelected ? termFilter[course.term] : true;
 
     const searchMatch =
@@ -191,7 +150,9 @@ const StudentCourseRegistration = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold">Course Registration</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">
+            Course Registration
+          </h1>
           <p className="text-gray-500 text-sm sm:text-base">
             Browse and register for courses in your program
           </p>
@@ -250,7 +211,10 @@ const StudentCourseRegistration = () => {
                     type="checkbox"
                     checked={tempLevelFilter[level]}
                     onChange={() =>
-                      setTempLevelFilter({ ...tempLevelFilter, [level]: !tempLevelFilter[level] })
+                      setTempLevelFilter({
+                        ...tempLevelFilter,
+                        [level]: !tempLevelFilter[level],
+                      })
                     }
                   />{" "}
                   {level}
@@ -267,7 +231,10 @@ const StudentCourseRegistration = () => {
                     type="checkbox"
                     checked={tempTypeFilter[type]}
                     onChange={() =>
-                      setTempTypeFilter({ ...tempTypeFilter, [type]: !tempTypeFilter[type] })
+                      setTempTypeFilter({
+                        ...tempTypeFilter,
+                        [type]: !tempTypeFilter[type],
+                      })
                     }
                   />{" "}
                   {type}
@@ -284,7 +251,10 @@ const StudentCourseRegistration = () => {
                     type="checkbox"
                     checked={tempCreditsFilter[credit]}
                     onChange={() =>
-                      setTempCreditsFilter({ ...tempCreditsFilter, [credit]: !tempCreditsFilter[credit] })
+                      setTempCreditsFilter({
+                        ...tempCreditsFilter,
+                        [credit]: !tempCreditsFilter[credit],
+                      })
                     }
                   />{" "}
                   {credit} Credits
@@ -301,7 +271,10 @@ const StudentCourseRegistration = () => {
                     type="checkbox"
                     checked={tempTermFilter[term]}
                     onChange={() =>
-                      setTempTermFilter({ ...tempTermFilter, [term]: !tempTermFilter[term] })
+                      setTempTermFilter({
+                        ...tempTermFilter,
+                        [term]: !tempTermFilter[term],
+                      })
                     }
                   />{" "}
                   {term}
@@ -325,61 +298,87 @@ const StudentCourseRegistration = () => {
       {/* Courses List */}
       <div className="bg-white p-4 sm:p-6 rounded-2xl shadow">
         <h2 className="font-semibold mb-4 text-lg">
-          Available Courses ({filteredCourses.length} found)
+          Available Courses (
+          {loading ? "Loading..." : `${filteredCourses.length} found`})
         </h2>
 
-        {filteredCourses.length === 0 && (
-          <p className="text-gray-500">No courses match your selected filters.</p>
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+
+        {!loading && !error && filteredCourses.length === 0 && (
+          <p className="text-gray-500">
+            No courses match your selected filters.
+          </p>
         )}
 
-        {filteredCourses.map((course) => (
-          <div
-            key={course.code}
-            className="border-b last:border-0 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
-          >
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg">
-                {course.code} – {course.title}{" "}
-                <span className="text-sm text-gray-500">({course.credits} Credits)</span>
-              </h3>
-              <p className="text-gray-600 text-sm mb-2">{course.description}</p>
-              <p className="text-gray-500 text-sm mb-1">📅 {course.schedule}</p>
-              <p className="text-gray-500 text-sm mb-2">👨‍🏫 {course.instructor}</p>
-              <div className="flex flex-wrap gap-2 text-xs">
-                <span className="border rounded-full px-2 py-1">{course.type}</span>
-                <span className="border rounded-full px-2 py-1">{course.level}</span>
-                <span className="border rounded-full px-2 py-1">{course.term}</span>
+        {loading && <p className="text-gray-500">Loading courses...</p>}
+
+        {!loading &&
+          !error &&
+          filteredCourses.map((course) => (
+            <div
+              key={course.code}
+              className="border-b last:border-0 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+            >
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg">
+                  {course.code} – {course.title}{" "}
+                  <span className="text-sm text-gray-500">
+                    ({course.credits} Credits)
+                  </span>
+                </h3>
+                <p className="text-gray-600 text-sm mb-2">
+                  {course.description}
+                </p>
+                <p className="text-gray-500 text-sm mb-1">
+                  📅 {course.schedule}
+                </p>
+                <p className="text-gray-500 text-sm mb-2">
+                  👨‍🏫 {course.instructor}
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="border rounded-full px-2 py-1">
+                    {course.type}
+                  </span>
+                  <span className="border rounded-full px-2 py-1">
+                    {course.level}
+                  </span>
+                  <span className="border rounded-full px-2 py-1">
+                    {course.term}
+                  </span>
+                </div>
+              </div>
+
+              {/* Add / Remove Button */}
+              <div className="text-right flex-shrink-0 flex flex-col items-end gap-2 mt-2 sm:mt-0">
+                <p className="text-sm text-gray-500 mb-1">
+                  Available Seats:{" "}
+                  <span className="font-semibold">
+                    {course.availableSeats}/{course.totalSeats}
+                  </span>
+                </p>
+                {selectedCourses.find((c) => c.code === course.code) ? (
+                  <button
+                    onClick={() => toggleCourse(course)}
+                    className="px-4 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => toggleCourse(course)}
+                    disabled={course.availableSeats === 0}
+                    className={`px-4 py-2 rounded-lg text-sm ${
+                      course.availableSeats === 0
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    Add to Cart
+                  </button>
+                )}
               </div>
             </div>
-
-            {/* Add / Remove Button */}
-            <div className="text-right flex-shrink-0 flex flex-col items-end gap-2 mt-2 sm:mt-0">
-              <p className="text-sm text-gray-500 mb-1">
-                Available Seats: <span className="font-semibold">{course.availableSeats}/{course.totalSeats}</span>
-              </p>
-              {selectedCourses.find((c) => c.code === course.code) ? (
-                <button
-                  onClick={() => toggleCourse(course)}
-                  className="px-4 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-700"
-                >
-                  Remove
-                </button>
-              ) : (
-                <button
-                  onClick={() => toggleCourse(course)}
-                  disabled={course.availableSeats === 0}
-                  className={`px-4 py-2 rounded-lg text-sm ${
-                    course.availableSeats === 0
-                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:bg-blue-700"
-                  }`}
-                >
-                  Add to Cart
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

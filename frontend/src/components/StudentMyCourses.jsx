@@ -1,97 +1,11 @@
+// src/components/StudentMyCourses.jsx
 import React, { useState, useEffect } from "react";
-import {
-  FaSearch,
-  FaCalendarAlt,
-  FaUserTie,
-  FaPlus,
-  FaTimes,
-} from "react-icons/fa";
+import { FaSearch, FaCalendarAlt, FaUserTie, FaPlus, FaTimes } from "react-icons/fa";
+import api from "../services/api.js";
 
 const StudentMyCourses = () => {
-  const allCourses = [
-    {
-      code: "SDEV101",
-      title: "Programming Fundamentals",
-      credits: 3,
-      description:
-        "Introduction to programming concepts using modern programming languages. Students will learn variables, data types, control structures, and basic algorithms.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 9:00–10:30 AM",
-      instructor: "Dr. Sarah Johnson",
-      availableSeats: 12,
-      totalSeats: 25,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV102",
-      title: "Database Design",
-      credits: 3,
-      description:
-        "Comprehensive study of database design principles, normalization, SQL, and database management systems.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 2:00–3:30 PM",
-      instructor: "Prof. Michael Chen",
-      availableSeats: 8,
-      totalSeats: 20,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV103",
-      title: "Web Development Fundamentals",
-      credits: 4,
-      description:
-        "Introduction to web development technologies including HTML, CSS, JavaScript, and modern frameworks.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 11:00–12:30 PM",
-      instructor: "Ms. Emily Rodriguez",
-      availableSeats: 15,
-      totalSeats: 22,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV104",
-      title: "Software Security",
-      credits: 3,
-      description:
-        "Study of software security principles, vulnerabilities, and testing methodologies.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 9:00–12:00 PM",
-      instructor: "Dr. James Wilson",
-      availableSeats: 6,
-      totalSeats: 18,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV105",
-      title: "Object-Oriented Programming",
-      credits: 4,
-      description:
-        "Advanced programming concepts including classes, objects, inheritance, and design patterns using Java and C#.",
-      schedule: "Jan 15 – Mar 30, 2025 | Thu 11:00–1:00 PM",
-      instructor: "Dr. Sarah Johnson",
-      availableSeats: 0,
-      totalSeats: 20,
-      level: "First Year",
-      type: "Core",
-    },
-    {
-      code: "SDEV106",
-      title: "Systems Analysis & Design",
-      credits: 3,
-      description:
-        "Methodologies for analyzing, designing, and implementing information systems. Focus on requirements gathering and system modeling.",
-      schedule: "Jan 15 – Mar 30, 2025 | Wed 2:00–3:00 PM",
-      instructor: "Prof. Michael Chen",
-      availableSeats: 10,
-      totalSeats: 16,
-      level: "First Year",
-      type: "Core",
-    },
-  ];
-
-
-
-  const [courses, setCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState([]); // from backend
+  const [courses, setCourses] = useState([]); // my enrolled courses
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTerm, setSelectedTerm] = useState("All Terms");
   const [selectedStatus, setSelectedStatus] = useState("All Status");
@@ -100,23 +14,58 @@ const StudentMyCourses = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addSelection, setAddSelection] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [error, setError] = useState("");
 
+  // 🔹 Load all courses from backend and init "my courses"
   useEffect(() => {
-    const storedCourses = localStorage.getItem("studentCourses");
-    if (storedCourses) {
-      const parsed = JSON.parse(storedCourses);
-      setCourses(parsed);
-    } else {
-      // only runs first time ever (no stored data)
-      const initial = allCourses.filter(
-        (c) => c.status === "Enrolled" || c.status === "In Progress"
-      );
-      setCourses(initial);
-      localStorage.setItem("studentCourses", JSON.stringify(initial));
-    }
-    setLoaded(true);
+    const init = async () => {
+      try {
+        setLoadingCourses(true);
+        setError("");
+        const res = await api.get("/courses");
+        const data = res.data || [];
+
+        const mappedAll = data.map((c) => ({
+          code: c.course_code,
+          title: c.course_name,
+          credits: c.credit_hours ?? 0,
+          description: c.description || "",
+          schedule:
+            c.start_date && c.end_date
+              ? `${c.start_date} – ${c.end_date}`
+              : "Schedule TBA",
+          instructor: c.instructor || "TBA",
+          level: "First Year", // placeholder
+          type: "Core", // placeholder
+          term: c.term_name || "Unknown Term",
+        }));
+
+        setAllCourses(mappedAll);
+
+        // Load my courses from localStorage (just codes + extra fields)
+        const stored = localStorage.getItem("studentCourses");
+        if (stored) {
+          setCourses(JSON.parse(stored));
+        } else {
+          // start with none enrolled
+          setCourses([]);
+          localStorage.setItem("studentCourses", JSON.stringify([]));
+        }
+
+        setLoaded(true);
+      } catch (err) {
+        console.error("Error loading courses:", err);
+        setError("Failed to load courses");
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+
+    init();
   }, []);
-  
+
+  // 🔹 Sync my courses to localStorage
   useEffect(() => {
     if (loaded) {
       localStorage.setItem("studentCourses", JSON.stringify(courses));
@@ -137,6 +86,12 @@ const StudentMyCourses = () => {
     }
     const selected = allCourses.find((c) => c.code === addSelection);
     if (selected) {
+      const alreadyEnrolled = courses.find((c) => c.code === selected.code);
+      if (alreadyEnrolled) {
+        alert("You are already enrolled in this course.");
+        return;
+      }
+
       const updated = [...courses, { ...selected, status: "Enrolled" }];
       setCourses(updated);
       setAddSelection("");
@@ -229,6 +184,11 @@ const StudentMyCourses = () => {
         </select>
       </div>
 
+      {loadingCourses && (
+        <p className="text-gray-600 mb-4">Loading courses from server...</p>
+      )}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
       {/* Course Cards */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         {filteredCourses.length > 0 ? (
@@ -246,20 +206,19 @@ const StudentMyCourses = () => {
                       : "bg-yellow-100 text-yellow-600"
                   }`}
                 >
-                  {course.status}
+                  {course.status || "Enrolled"}
                 </span>
               </div>
               <p className="text-gray-700 font-medium mb-1">{course.title}</p>
-              <p className="text-sm text-gray-500 mb-2">
-                <FaCalendarAlt className="inline mr-1" /> {course.date}
-              </p>
               <p className="text-sm text-gray-500 mb-2">
                 <FaCalendarAlt className="inline mr-1" /> {course.schedule}
               </p>
               <p className="text-sm text-gray-500">
                 <FaUserTie className="inline mr-1" /> {course.instructor}
               </p>
-              <p className="text-sm text-gray-600 mt-2">{course.credits} Credits</p>
+              <p className="text-sm text-gray-600 mt-2">
+                {course.credits} Credits
+              </p>
               <div className="mt-4 flex justify-between">
                 <button
                   className="text-blue-600 text-sm hover:underline"
@@ -293,7 +252,9 @@ const StudentMyCourses = () => {
             >
               <FaTimes />
             </button>
-            <h2 className="text-xl font-semibold mb-2">{selectedCourse.title}</h2>
+            <h2 className="text-xl font-semibold mb-2">
+              {selectedCourse.title}
+            </h2>
             <p className="text-gray-600 mb-3">
               <strong>Course Code:</strong> {selectedCourse.code}
             </p>
@@ -303,7 +264,9 @@ const StudentMyCourses = () => {
             <p className="text-gray-600 mb-3">
               <strong>Schedule:</strong> {selectedCourse.schedule}
             </p>
-            <p className="text-gray-700 mb-4">{selectedCourse.description}</p>
+            <p className="text-gray-700 mb-4">
+              {selectedCourse.description}
+            </p>
             <button
               onClick={() => setSelectedCourse(null)}
               className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -347,7 +310,9 @@ const StudentMyCourses = () => {
                 </button>
               </>
             ) : (
-              <p className="text-gray-500">All available courses are already enrolled.</p>
+              <p className="text-gray-500">
+                All available courses are already enrolled.
+              </p>
             )}
           </div>
         </div>

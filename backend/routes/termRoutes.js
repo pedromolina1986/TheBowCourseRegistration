@@ -19,8 +19,8 @@ router.get("/terms/:id", getTermById);
 router.get("/terms/search/:keyword", searchTerms);
 
 // Student: get & update MY selected term
-router.get("/students/me/term", verifyToken, getCurrentStudentTerm);
-router.patch("/students/me/term", verifyToken, updateCurrentStudentTerm);
+router.get("/students/me/terms", verifyToken, getCurrentStudentTerm);
+router.patch("/students/me/terms", verifyToken, updateCurrentStudentTerm);
 
 // Admin-only actions (manage terms)
 router.post("/terms", verifyToken, authorizeAdmin, createTerm);

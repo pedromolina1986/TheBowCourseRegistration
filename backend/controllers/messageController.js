@@ -28,7 +28,7 @@ export async function submitMessage(req, res) {
       .query(`
         INSERT INTO SubmittedForms (student_id, subject, issue_description, submission_date, status, priority, admin_id)
         OUTPUT INSERTED.*
-        VALUES (@student_id, @subject, @issue_description, @submission_date, @status, @priority, (SELECT assigned_by FROM Student WHERE student_id=@student_id))
+        VALUES ((SELECT student_id FROM Student WHERE user_id=@student_id), @subject, @issue_description, @submission_date, @status, @priority, (SELECT assigned_by FROM Student WHERE user_id=@student_id))
       `);
 
     return res.status(201).json(result.recordset[0]);

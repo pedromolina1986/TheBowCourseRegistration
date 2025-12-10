@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import api from "../services/api";
+import api from "../services/api.js";
 
 const StudentTermSelection = () => {
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ const StudentTermSelection = () => {
 
         // Load current term selection (if any)
         try {
-          const selRes = await api.get("student/term-selection");
+          const selRes = await api.get("students/me/terms");
           if (selRes.data?.term_id) {
             setSelectedTermId(selRes.data.term_id);
           }
@@ -89,28 +89,10 @@ const StudentTermSelection = () => {
       return;
     }
 
-    try {
-      setSaving(true);
-      const res = await api.post("student/term-selection", {
-        term_id: selectedTermId,
-      });
-      console.log("Saved term selection:", res.data);
-
-      alert("Term selection saved successfully!");
-
-      // Pass selected term to Course Registration page
+    // Pass selected term to Course Registration page
       navigate("/dashboard/courseregistration", {
         state: { termId: selectedTermId },
       });
-    } catch (err) {
-      console.error("Failed to save term selection:", err.response?.data || err);
-      alert(
-        err.response?.data?.error ||
-          "Failed to save term selection. Please try again."
-      );
-    } finally {
-      setSaving(false);
-    }
   };
 
   // Back to Student Dashboard
