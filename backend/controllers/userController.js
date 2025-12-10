@@ -420,20 +420,7 @@ export async function getLoggedInUserDetails(req, res) {
         .input("id", sql.Int, id)
         .query(`
           SELECT 
-            student_id,
-            user_id,
-            first_name,
-            last_name,
-            email,
-            program,
-            year_level,
-            assigned_by,
-            phone,
-            street,
-            city,
-            province,
-            postal_code,
-            start_date
+            *
           FROM Student
           WHERE user_id = @id
         `);
